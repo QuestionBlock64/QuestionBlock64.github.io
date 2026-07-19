@@ -50,8 +50,8 @@
             padding: 30px;
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            row-gap: 100px;    /* INCREASED VERTICAL GAP FOR FIX */
-            column-gap: 25px;   /* KEEPS HORIZONTAL SPACING NEAT */
+            row-gap: 150px;    /* UPDATED VERTICAL SPACING */
+            column-gap: 35px;   /* UPDATED HORIZONTAL SPACING */
             overflow-y: auto;
             flex-grow: 1;
             min-height: 0; 
@@ -250,7 +250,7 @@
                 const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
                 
                 imageFiles = files
-                    .filter(file => file.type === 'file' && validExtensions.some(ext => file.name.toLowerCase().endsWith(ext)))
+                    .filter(file => file.type === 'file' && file.name.toLowerCase().endsWith(file.name.split('.').pop()) && validExtensions.some(ext => file.name.toLowerCase().endsWith(ext)))
                     .map(file => ({
                         name: file.name,
                         url: file.download_url
