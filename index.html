@@ -53,7 +53,7 @@
             padding: 30px 0;
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 150px 35px; /* Creates the "breathing room" */
+            gap: 150px 15px; /* 150px vertical, 15px horizontal */
             overflow-y: auto;
             flex-grow: 1;
             min-height: 0; 
@@ -301,7 +301,7 @@
             for(let i=0; i < remaining; i++) {
                 const emptySlot = document.createElement('div');
                 emptySlot.className = 'grid-item';
-                emptySlot.innerHTML = '&#9862;';
+                emptySlot.innerHTML = '&#9711;'; // Circle character
                 emptySlot.style.cursor = 'default';
                 emptySlot.onclick = null;
                 gridContainer.appendChild(emptySlot);
