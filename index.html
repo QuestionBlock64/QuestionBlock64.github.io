@@ -210,11 +210,8 @@
     <script>
         // --- CONFIGURATION ---
         const GITHUB_USERNAME = "QuestionBlock64";
-        const REPO_NAME = "The-Bee-Folder"; 
-        
-        // Leave blank if images are in the root of the repo.
-        // If they are in a folder inside the repo, type the folder name here.
-        const FOLDER_NAME = ""; 
+        const REPO_NAME = "The-Bee-Folder";       // The repository name
+        const FOLDER_NAME = "The Bee Folder";     // The folder inside the repository
 
         let imageFiles = [];
         let currentIndex = 0;
@@ -228,7 +225,7 @@
 
         // Fetch file list dynamically via GitHub API
         async function fetchImagesFromGitHub() {
-            const encodedFolder = FOLDER_NAME ? encodeURIComponent(FOLDER_NAME) : '';
+            const encodedFolder = encodeURIComponent(FOLDER_NAME);
             const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${encodedFolder}`;
 
             try {
@@ -249,7 +246,7 @@
                     }));
 
                 if (imageFiles.length === 0) {
-                    infoBar.innerText = "No images found in the specified repository.";
+                    infoBar.innerText = "No images found in the specified folder.";
                     return;
                 }
 
@@ -258,7 +255,7 @@
 
             } catch (error) {
                 console.error(error);
-                infoBar.innerText = "Error: Couldn't connect to the repository. Ensure it is Public.";
+                infoBar.innerText = "Error: Couldn't connect to the repository folder. Ensure it is Public.";
             }
         }
 
