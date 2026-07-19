@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Gallery</title>
     <style>
-        /* Base Styling & Theme */
         :root {
-            --bg-color: #fcecf4; /* Light pink background */
+            --bg-color: #fcecf4;
             --header-pink: #ffb6c1;
             --accent-pink: #ff69b4;
             --text-dark: #4a4a4a;
@@ -26,7 +25,6 @@
             align-items: center;
         }
 
-        /* --- View 1: Gallery Menu (Grid) --- */
         #gallery-menu {
             background-color: var(--bg-color);
             width: 80%;
@@ -81,9 +79,8 @@
             object-fit: cover;
         }
 
-        /* --- View 2: Detailed Image Viewer --- */
         #image-viewer {
-            display: none; /* Hidden by default */
+            display: none;
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             background-color: var(--dark-purple);
@@ -116,7 +113,6 @@
             font-size: 14px;
         }
 
-        /* Bottom Thumbnail Carousel */
         .carousel-container {
             height: 150px;
             background-color: var(--dark-purple);
@@ -133,9 +129,9 @@
             overflow-x: auto;
             max-width: 70%;
             padding: 10px;
-            scrollbar-width: none; /* Hide scrollbar Firefox */
+            scrollbar-width: none;
         }
-        .carousel-track::-webkit-scrollbar { display: none; /* Hide scrollbar Chrome/Safari */ }
+        .carousel-track::-webkit-scrollbar { display: none; }
 
         .thumb {
             width: 160px;
@@ -148,22 +144,10 @@
             border: 2px solid transparent;
         }
 
-        .thumb:hover, .thumb.active {
-            opacity: 1;
-        }
+        .thumb:hover, .thumb.active { opacity: 1; }
+        .thumb.active { border-color: var(--accent-pink); transform: scale(1.05); }
+        .thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-        .thumb.active {
-            border-color: var(--accent-pink);
-            transform: scale(1.05);
-        }
-
-        .thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* Controls */
         .arrow {
             font-size: 40px;
             color: var(--accent-pink);
@@ -171,7 +155,6 @@
             user-select: none;
             padding: 0 20px;
         }
-
         .arrow:hover { color: #ff99cc; }
 
         .viewer-controls {
@@ -184,15 +167,8 @@
             font-size: 18px;
         }
 
-        .btn-control {
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-
-        .btn-control:hover {
-            color: var(--header-pink);
-        }
-
+        .btn-control { cursor: pointer; transition: color 0.2s; }
+        .btn-control:hover { color: var(--header-pink); }
     </style>
 </head>
 <body>
@@ -201,10 +177,10 @@
     <div id="gallery-menu">
         <div class="menu-header">
             <span>Pictures</span>
-            <span style="cursor: pointer;">&times;</span>
+            <span style="cursor: pointer;" onclick="closeViewer()">&times;</span>
         </div>
         <div class="grid-container" id="grid-container">
-            <!-- Grid items injected via JS -->
+            <!-- Dynamic items go here -->
         </div>
     </div>
 
@@ -214,13 +190,13 @@
             <img id="main-display-img" src="" alt="Selected Image">
         </div>
         <div class="info-bar" id="info-bar">
-            [ACQUISITION PROCEDURE] Select an image to view details.
+            Loading images from GitHub...
         </div>
         
         <div class="carousel-container">
             <div class="arrow" onclick="changeImage(-1)">&#9664;</div>
             <div class="carousel-track" id="carousel-track">
-                <!-- Thumbnails injected via JS -->
+                <!-- Dynamic thumbnails go here -->
             </div>
             <div class="arrow" onclick="changeImage(1)">&#9654;</div>
             
@@ -233,18 +209,16 @@
 
     <script>
         // --- CONFIGURATION ---
-        // Add your exact image filenames here. 
-        // The script expects them to be in a folder named "The Bee Folder" in the same directory as this HTML file.
-        const imageFiles = [
-            "image_6afe43.jpg",
-            "image_6b0526.jpg",
-            // Add more filenames like "bee1.png", "bee2.jpg", etc.
-        ];
+        const GITHUB_USERNAME = "QuestionBlock64";
+        const REPO_NAME = "The-Bee-Folder"; 
+        
+        // Leave blank if images are in the root of the repo.
+        // If they are in a folder inside the repo, type the folder name here.
+        const FOLDER_NAME = ""; 
 
-        const FOLDER_NAME = "The Bee Folder";
+        let imageFiles = [];
         let currentIndex = 0;
 
-        // --- DOM Elements ---
         const gridContainer = document.getElementById('grid-container');
         const galleryMenu = document.getElementById('gallery-menu');
         const imageViewer = document.getElementById('image-viewer');
@@ -252,39 +226,73 @@
         const carouselTrack = document.getElementById('carousel-track');
         const infoBar = document.getElementById('info-bar');
 
-        // --- Initialization ---
-        function initGallery() {
-            // Generate Grid and Carousel Thumbnails
-            imageFiles.forEach((file, index) => {
-                const imagePath = `${FOLDER_NAME}/${file}`;
+        // Fetch file list dynamically via GitHub API
+        async function fetchImagesFromGitHub() {
+            const encodedFolder = FOLDER_NAME ? encodeURIComponent(FOLDER_NAME) : '';
+            const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${encodedFolder}`;
 
-                // 1. Create Grid Item
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error("Could not read repo. Check repo name and visibility.");
+                
+                const files = await response.json();
+                
+                // Filter out non-image files
+                const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+                
+                // Save both the filename AND the direct download URL
+                imageFiles = files
+                    .filter(file => file.type === 'file' && validExtensions.some(ext => file.name.toLowerCase().endsWith(ext)))
+                    .map(file => ({
+                        name: file.name,
+                        url: file.download_url
+                    }));
+
+                if (imageFiles.length === 0) {
+                    infoBar.innerText = "No images found in the specified repository.";
+                    return;
+                }
+
+                infoBar.innerText = `[ACQUISITION PROCEDURE] Loaded ${imageFiles.length} images.`;
+                buildGallery();
+
+            } catch (error) {
+                console.error(error);
+                infoBar.innerText = "Error: Couldn't connect to the repository. Ensure it is Public.";
+            }
+        }
+
+        function buildGallery() {
+            gridContainer.innerHTML = '';
+            carouselTrack.innerHTML = '';
+
+            imageFiles.forEach((file, index) => {
+                // 1. Grid Menu Item (Uses direct download URL)
                 const gridItem = document.createElement('div');
                 gridItem.className = 'grid-item';
-                gridItem.innerHTML = `<img src="${imagePath}" alt="${file}" onerror="this.parentElement.innerHTML='Image Not Found'">`;
+                gridItem.innerHTML = `<img src="${file.url}" alt="${file.name}" loading="lazy">`;
                 gridItem.onclick = () => openViewer(index);
                 gridContainer.appendChild(gridItem);
 
-                // 2. Create Carousel Thumbnail
+                // 2. Carousel Thumbnail
                 const thumb = document.createElement('div');
                 thumb.className = 'thumb';
                 thumb.id = `thumb-${index}`;
-                thumb.innerHTML = `<img src="${imagePath}" alt="Thumb ${index}">`;
+                thumb.innerHTML = `<img src="${file.url}" alt="Thumb ${index}" loading="lazy">`;
                 thumb.onclick = () => setImage(index);
                 carouselTrack.appendChild(thumb);
             });
 
-            // Fill empty grid slots with placeholders to match the screenshot aesthetic
-            const emptySlotsNeeded = 16 - imageFiles.length; // Ensure at least 16 slots total
+            // Aesthetic spacer slots
+            const emptySlotsNeeded = Math.max(0, 16 - imageFiles.length);
             for(let i=0; i < emptySlotsNeeded; i++) {
                 const emptySlot = document.createElement('div');
                 emptySlot.className = 'grid-item';
-                emptySlot.innerHTML = '&#9862;'; // Placeholder icon
+                emptySlot.innerHTML = '&#9862;';
                 gridContainer.appendChild(emptySlot);
             }
         }
 
-        // --- Viewer Logic ---
         function openViewer(index) {
             galleryMenu.style.display = 'none';
             imageViewer.style.display = 'flex';
@@ -299,10 +307,11 @@
         function setImage(index) {
             currentIndex = index;
             const file = imageFiles[index];
-            mainDisplayImg.src = `${FOLDER_NAME}/${file}`;
-            infoBar.innerText = `[VIEWING] ${file}`;
+            
+            // Set the main image to the direct download URL
+            mainDisplayImg.src = file.url;
+            infoBar.innerText = `[VIEWING] ${file.name}`;
 
-            // Update active thumbnail styling
             document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
             const activeThumb = document.getElementById(`thumb-${index}`);
             if(activeThumb) {
@@ -315,15 +324,14 @@
             if (imageFiles.length === 0) return;
             let newIndex = currentIndex + direction;
             
-            // Loop around if at the ends
             if (newIndex < 0) newIndex = imageFiles.length - 1;
             if (newIndex >= imageFiles.length) newIndex = 0;
             
             setImage(newIndex);
         }
 
-        // Run setup
-        initGallery();
+        // Start the engine
+        fetchImagesFromGitHub();
     </script>
 </body>
 </html>
