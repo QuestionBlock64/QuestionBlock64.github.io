@@ -16,7 +16,11 @@
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--dark-purple);
+            /* Normal view background */
+            background-image: url('Background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             color: var(--text-dark);
             height: 100vh;
             overflow: hidden;
@@ -85,7 +89,10 @@
             display: none;
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--dark-purple);
+            /* Full view doodle background */
+            background-image: url('BeeDoodleBackground.jpg');
+            background-size: cover;
+            background-position: center;
             flex-direction: column;
             z-index: 100;
         }
@@ -96,7 +103,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            background-color: #2a0845;
+            background-color: transparent;
             padding: 20px;
         }
 
@@ -104,6 +111,8 @@
             max-width: 90%;
             max-height: 70vh;
             box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            object-fit: contain;
+            transition: opacity 0.3s ease;
         }
 
         .info-bar {
@@ -117,7 +126,7 @@
 
         .carousel-container {
             height: 150px;
-            background-color: var(--dark-purple);
+            background-color: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -197,7 +206,7 @@
 
     <div id="image-viewer">
         <div class="main-image-container">
-            <img id="main-display-img" src="" alt="Selected Image">
+            <img id="main-display-img" src="" alt="Selected Image" style="opacity: 0;">
         </div>
         <div class="info-bar" id="info-bar">
             Loading images from GitHub...
@@ -259,7 +268,6 @@
                 const gridItem = document.createElement('div');
                 gridItem.className = 'grid-item';
                 gridItem.innerHTML = `<img src="${file.url}" alt="${file.name}" loading="lazy">`;
-                // Pass event to openViewer
                 gridItem.onclick = (e) => openViewer(index, e);
                 gridContainer.appendChild(gridItem);
 
@@ -273,45 +281,108 @@
         }
 
         function openViewer(index, event) {
-            const rect = event.currentTarget.getBoundingClientRect();
-            
-            // Create a temporary clone for the expand animation
-            const clone = event.currentTarget.cloneNode(true);
-            clone.style.position = 'fixed';
-            clone.style.top = rect.top + 'px';
-            clone.style.left = rect.left + 'px';
-            clone.style.width = rect.width + 'px';
-            clone.style.height = rect.height + 'px';
-            clone.style.zIndex = '1000';
-            clone.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-            clone.style.pointerEvents = 'none';
-            document.body.appendChild(clone);
+            const clickedItem = event.currentTarget;
+            const startRect = clickedItem.getBoundingClientRect();
+            const imageUrl = imageFiles[index].url;
 
-            // Animate clone to center and fill screen
-            requestAnimationFrame(() => {
-                clone.style.top = '0';
-                clone.style.left = '0';
-                clone.style.width = '100%';
-                clone.style.height = '100%';
-                clone.style.borderRadius = '0';
-            });
-
-            // Reveal viewer after animation
-            setTimeout(() => {
-                galleryMenu.style.display = 'none';
-                imageViewer.style.display = 'flex';
-                mainDisplayImg.style.opacity = '1';
-                clone.remove();
-            }, 400);
-
-            // Hide main image initially
+            mainDisplayImg.src = imageUrl;
             mainDisplayImg.style.opacity = '0';
-            setImage(index);
+
+            function startAnimation() {
+                imageViewer.style.display = 'flex';
+                galleryMenu.style.display = 'none';
+                imageViewer.offsetHeight;
+                const targetRect = mainDisplayImg.getBoundingClientRect();
+
+                const clone = clickedItem.cloneNode(true);
+                clone.style.position = 'fixed';
+                clone.style.top = startRect.top + 'px';
+                clone.style.left = startRect.left + 'px';
+                clone.style.width = startRect.width + 'px';
+                clone.style.height = startRect.height + 'px';
+                clone.style.zIndex = '1001';
+                clone.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                clone.style.pointerEvents = 'none';
+                clone.style.margin = '0';
+                const cloneImg = clone.querySelector('img');
+                if (cloneImg) {
+                    cloneImg.style.width = '100%';
+                    cloneImg.style.height = '100%';
+                    cloneImg.style.objectFit = 'cover';
+                }
+                document.body.appendChild(clone);
+
+                clone.offsetHeight;
+
+                clone.style.top = targetRect.top + 'px';
+                clone.style.left = targetRect.left + 'px';
+                clone.style.width = targetRect.width + 'px';
+                clone.style.height = targetRect.height + 'px';
+                clone.style.borderRadius = '0';
+
+                setTimeout(() => {
+                    clone.remove();
+                    mainDisplayImg.style.opacity = '1';
+                }, 400);
+
+                setImage(index);
+            }
+
+            if (mainDisplayImg.complete && mainDisplayImg.naturalWidth !== 0) {
+                startAnimation();
+            } else {
+                mainDisplayImg.onload = startAnimation;
+            }
         }
 
         function closeViewer() {
-            imageViewer.style.display = 'none';
+            const targetGridItem = gridContainer.children[currentIndex];
+            if (!targetGridItem) {
+                imageViewer.style.display = 'none';
+                galleryMenu.style.display = 'flex';
+                return;
+            }
+
             galleryMenu.style.display = 'flex';
+            targetGridItem.scrollIntoView({ behavior: 'instant', block: 'center' });
+
+            requestAnimationFrame(() => {
+                const startRect = mainDisplayImg.getBoundingClientRect();
+                const targetRect = targetGridItem.getBoundingClientRect();
+
+                const clone = document.createElement('img');
+                clone.src = mainDisplayImg.src;
+                clone.style.position = 'fixed';
+                clone.style.top = startRect.top + 'px';
+                clone.style.left = startRect.left + 'px';
+                clone.style.width = startRect.width + 'px';
+                clone.style.height = startRect.height + 'px';
+                clone.style.zIndex = '1001';
+                clone.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                clone.style.pointerEvents = 'none';
+                clone.style.objectFit = 'contain';
+                clone.style.boxShadow = '0 0 20px rgba(0,0,0,0.8)';
+                clone.style.borderRadius = '0';
+                document.body.appendChild(clone);
+
+                mainDisplayImg.style.opacity = '0';
+
+                clone.offsetHeight;
+
+                clone.style.top = targetRect.top + 'px';
+                clone.style.left = targetRect.left + 'px';
+                clone.style.width = targetRect.width + 'px';
+                clone.style.height = targetRect.height + 'px';
+                clone.style.objectFit = 'cover';
+                clone.style.boxShadow = 'none';
+                clone.style.borderRadius = '5px';
+
+                setTimeout(() => {
+                    clone.remove();
+                    imageViewer.style.display = 'none';
+                    mainDisplayImg.style.opacity = '0';
+                }, 400);
+            });
         }
 
         function setImage(index) {
