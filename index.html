@@ -13,15 +13,6 @@
             --dark-purple: #4a235a;
         }
 
-        /* ANIMATION FOR EXPANDING */
-        @keyframes expand-zoom {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        .expand-animation {
-            animation: expand-zoom 0.3s ease-out forwards;
-        }
-
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -59,8 +50,8 @@
             padding: 30px 30px 150px 30px;
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            row-gap: 150px;    /* UPDATED VERTICAL SPACING */
-            column-gap: 35px;   /* UPDATED HORIZONTAL SPACING */
+            row-gap: 150px;
+            column-gap: 35px;
             overflow-y: auto;
             flex-grow: 1;
             min-height: 0; 
@@ -195,18 +186,15 @@
 </head>
 <body>
 
-    <!-- VIEW 1: Gallery Menu -->
     <div id="gallery-menu">
         <div class="menu-header">
             <span>Pictures</span>
             <span style="cursor: pointer;" onclick="closeViewer()">&times;</span>
         </div>
         <div class="grid-container" id="grid-container">
-            <!-- Dynamic items go here -->
         </div>
     </div>
 
-    <!-- VIEW 2: Detailed Viewer -->
     <div id="image-viewer">
         <div class="main-image-container">
             <img id="main-display-img" src="" alt="Selected Image">
@@ -218,7 +206,6 @@
         <div class="carousel-container">
             <div class="arrow" onclick="changeImage(-1)">&#9664;</div>
             <div class="carousel-track" id="carousel-track">
-                <!-- Dynamic thumbnails go here -->
             </div>
             <div class="arrow" onclick="changeImage(1)">&#9654;</div>
             
@@ -230,7 +217,6 @@
     </div>
 
     <script>
-        // --- CONFIGURATION ---
         const GITHUB_USERNAME = "QuestionBlock64";
         const REPO_NAME = "The-Bee-Folder";        
         const FOLDER_NAME = "The Bee Folder";      
@@ -245,49 +231,36 @@
         const carouselTrack = document.getElementById('carousel-track');
         const infoBar = document.getElementById('info-bar');
 
-        // Fetch file list dynamically via GitHub API
         async function fetchImagesFromGitHub() {
             const encodedFolder = encodeURIComponent(FOLDER_NAME);
             const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${encodedFolder}`;
 
             try {
                 const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error("Could not read repo. Check repo name and visibility.");
-                
+                if (!response.ok) throw new Error("Could not read repo.");
                 const files = await response.json();
-                
                 const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
-                
                 imageFiles = files
-                    .filter(file => file.type === 'file' && file.name.toLowerCase().endsWith(file.name.split('.').pop()) && validExtensions.some(ext => file.name.toLowerCase().endsWith(ext)))
-                    .map(file => ({
-                        name: file.name,
-                        url: file.download_url
-                    }));
+                    .filter(file => file.type === 'file' && validExtensions.some(ext => file.name.toLowerCase().endsWith(ext)))
+                    .map(file => ({ name: file.name, url: file.download_url }));
 
-                if (imageFiles.length === 0) {
-                    infoBar.innerText = "No images found in the specified folder.";
-                    return;
-                }
-
+                if (imageFiles.length === 0) return;
                 infoBar.innerText = `[ACQUISITION PROCEDURE] Loaded ${imageFiles.length} images.`;
                 buildGallery();
-
             } catch (error) {
-                console.error(error);
-                infoBar.innerText = "Error: Couldn't connect to the repository folder. Ensure it is Public.";
+                infoBar.innerText = "Error loading images.";
             }
         }
 
         function buildGallery() {
             gridContainer.innerHTML = '';
             carouselTrack.innerHTML = '';
-
             imageFiles.forEach((file, index) => {
                 const gridItem = document.createElement('div');
                 gridItem.className = 'grid-item';
                 gridItem.innerHTML = `<img src="${file.url}" alt="${file.name}" loading="lazy">`;
-                gridItem.onclick = () => openViewer(index);
+                // Pass event to openViewer
+                gridItem.onclick = (e) => openViewer(index, e);
                 gridContainer.appendChild(gridItem);
 
                 const thumb = document.createElement('div');
@@ -297,25 +270,42 @@
                 thumb.onclick = () => setImage(index);
                 carouselTrack.appendChild(thumb);
             });
-
-            const emptySlotsNeeded = Math.max(0, 18 - imageFiles.length);
-            for(let i=0; i < emptySlotsNeeded; i++) {
-                const emptySlot = document.createElement('div');
-                emptySlot.className = 'grid-item';
-                emptySlot.innerHTML = '&#9862;';
-                gridContainer.appendChild(emptySlot);
-            }
         }
 
-        function openViewer(index) {
-            galleryMenu.style.display = 'none';
-            imageViewer.style.display = 'flex';
+        function openViewer(index, event) {
+            const rect = event.currentTarget.getBoundingClientRect();
             
-            // Trigger animation
-            mainDisplayImg.classList.remove('expand-animation');
-            void mainDisplayImg.offsetWidth; // Trigger reflow
-            mainDisplayImg.classList.add('expand-animation');
-            
+            // Create a temporary clone for the expand animation
+            const clone = event.currentTarget.cloneNode(true);
+            clone.style.position = 'fixed';
+            clone.style.top = rect.top + 'px';
+            clone.style.left = rect.left + 'px';
+            clone.style.width = rect.width + 'px';
+            clone.style.height = rect.height + 'px';
+            clone.style.zIndex = '1000';
+            clone.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            clone.style.pointerEvents = 'none';
+            document.body.appendChild(clone);
+
+            // Animate clone to center and fill screen
+            requestAnimationFrame(() => {
+                clone.style.top = '0';
+                clone.style.left = '0';
+                clone.style.width = '100%';
+                clone.style.height = '100%';
+                clone.style.borderRadius = '0';
+            });
+
+            // Reveal viewer after animation
+            setTimeout(() => {
+                galleryMenu.style.display = 'none';
+                imageViewer.style.display = 'flex';
+                mainDisplayImg.style.opacity = '1';
+                clone.remove();
+            }, 400);
+
+            // Hide main image initially
+            mainDisplayImg.style.opacity = '0';
             setImage(index);
         }
 
@@ -327,10 +317,8 @@
         function setImage(index) {
             currentIndex = index;
             const file = imageFiles[index];
-            
             mainDisplayImg.src = file.url;
             infoBar.innerText = `[VIEWING] ${file.name}`;
-
             document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
             const activeThumb = document.getElementById(`thumb-${index}`);
             if(activeThumb) {
@@ -342,10 +330,8 @@
         function changeImage(direction) {
             if (imageFiles.length === 0) return;
             let newIndex = currentIndex + direction;
-            
             if (newIndex < 0) newIndex = imageFiles.length - 1;
             if (newIndex >= imageFiles.length) newIndex = 0;
-            
             setImage(newIndex);
         }
 
