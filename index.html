@@ -35,13 +35,13 @@
             flex-direction: column;
             overflow: hidden;
             position: relative;
-            /* Added padding to give breathing room horizontally and vertically */
-            padding: 20px 30px;
+            /* Increased top/bottom padding for more vertical breathing room */
+            padding: 30px 30px;
             box-sizing: border-box;
         }
 
         .menu-header {
-            padding: 0 0 15px 0;
+            padding: 0 0 20px 0; /* more space under header */
             font-weight: bold;
             color: var(--dark-purple);
             border-bottom: 2px solid var(--header-pink);
@@ -50,11 +50,11 @@
         }
 
         .grid-container {
-            /* Reduced padding because outer container now has padding */
-            padding: 25px 0;
+            padding: 30px 0; /* vertical padding only, extra space above first row and below last row */
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 35px; /* increased horizontal and vertical gap */
+            /* Row gap (vertical) increased to 50px, column gap (horizontal) stays 35px */
+            gap: 50px 35px;
             overflow-y: auto;
             flex-grow: 1;
             align-content: start;
@@ -128,16 +128,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* increased horizontal padding so arrows are farther from the track */
             padding: 0 50px;
             position: relative;
         }
 
         .carousel-track {
             display: flex;
-            gap: 20px; /* increased gap between thumbnails */
+            gap: 20px;
             overflow-x: auto;
-            max-width: 75%; /* slightly wider track with more room */
+            max-width: 75%;
             padding: 10px;
             scrollbar-width: none;
         }
@@ -163,7 +162,7 @@
             color: var(--accent-pink);
             cursor: pointer;
             user-select: none;
-            padding: 0 25px; /* increased padding so arrows don't hug the track */
+            padding: 0 25px;
         }
         .arrow:hover { color: #ff99cc; }
 
