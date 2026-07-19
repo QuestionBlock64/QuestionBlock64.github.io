@@ -28,51 +28,45 @@
         #gallery-menu {
             background-color: var(--bg-color);
             width: 80%;
-            height: 80%; /* Back to original height – not full screen */
+            height: 80%;
             border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             position: relative;
-            padding: 30px 30px;
-            box-sizing: border-box;
         }
 
         .menu-header {
-            padding: 0 0 20px 0;
+            padding: 15px 20px;
             font-weight: bold;
             color: var(--dark-purple);
             border-bottom: 2px solid var(--header-pink);
             display: flex;
             justify-content: space-between;
-            flex-shrink: 0;
         }
 
         .grid-container {
-            padding: 30px 0; /* top/bottom padding inside the scroll area */
+            padding: 30px;
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 150px 35px; /* Vertical (row) gap = 150px, Horizontal (column) gap = 35px */
+            row-gap: 50px;      /* FORCES ROWS FARTHER APART VERTICALLY */
+            column-gap: 25px;   /* KEEPS HORIZONTAL SPACING NEAT */
             overflow-y: auto;
             flex-grow: 1;
-            align-content: start;
+            min-height: 0; 
+            align-content: start; 
         }
 
         .grid-item {
             background-color: #e0e0e0;
             border-radius: 5px;
             cursor: pointer;
-            aspect-ratio: 16 / 9; /* original 16:9 aspect ratio */
+            aspect-ratio: 16/9;
             width: 100%;
             overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: #999;
         }
 
         .grid-item:hover {
@@ -127,15 +121,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 50px;
+            padding: 0 20px;
             position: relative;
         }
 
         .carousel-track {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             overflow-x: auto;
-            max-width: 75%;
+            max-width: 70%;
             padding: 10px;
             scrollbar-width: none;
         }
@@ -161,14 +155,14 @@
             color: var(--accent-pink);
             cursor: pointer;
             user-select: none;
-            padding: 0 25px;
+            padding: 0 20px;
         }
         .arrow:hover { color: #ff99cc; }
 
         .viewer-controls {
             position: absolute;
             bottom: 20px;
-            right: 50px;
+            right: 40px;
             display: flex;
             gap: 20px;
             color: white;
@@ -177,6 +171,17 @@
 
         .btn-control { cursor: pointer; transition: color 0.2s; }
         .btn-control:hover { color: var(--header-pink); }
+
+        @media (max-width: 1200px) {
+            .grid-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        @media (max-width: 800px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
@@ -284,351 +289,11 @@
                 carouselTrack.appendChild(thumb);
             });
 
-            // Fill remaining slots so the last row completes 6 columns
-            const remaining = (6 - (imageFiles.length % 6)) % 6;
-            for(let i=0; i < remaining; i++) {
+            const emptySlotsNeeded = Math.max(0, 18 - imageFiles.length);
+            for(let i=0; i < emptySlotsNeeded; i++) {
                 const emptySlot = document.createElement('div');
                 emptySlot.className = 'grid-item';
                 emptySlot.innerHTML = '&#9862;';
-                emptySlot.style.cursor = 'default';
-                emptySlot.onclick = null;
-                gridContainer.appendChild(emptySlot);
-            }
-        }
-
-        function openViewer(index) {
-            galleryMenu.style.display = 'none';
-            imageViewer.style.display = 'flex';
-            setImage(index);
-        }
-
-        function closeViewer() {
-            imageViewer.style.display = 'none';
-            galleryMenu.style.display = 'flex';
-        }
-
-        function setImage(index) {
-            currentIndex = index;
-            const file = imageFiles[index];
-            
-            mainDisplayImg.src = file.url;
-            infoBar.innerText = `[VIEWING] ${file.name}`;
-
-            document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-            const activeThumb = document.getElementById(`thumb-${index}`);
-            if(activeThumb) {
-                activeThumb.classList.add('active');
-                activeThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-            }
-        }
-
-        function changeImage(direction) {
-            if (imageFiles.length === 0) return;
-            let newIndex = currentIndex + direction;
-            
-            if (newIndex < 0) newIndex = imageFiles.length - 1;
-            if (newIndex >= imageFiles.length) newIndex = 0;
-            
-            setImage(newIndex);
-        }
-
-        fetchImagesFromGitHub();
-    </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Gallery</title>
-    <style>
-        :root {
-            --bg-color: #fcecf4;
-            --header-pink: #ffb6c1;
-            --accent-pink: #ff69b4;
-            --text-dark: #4a4a4a;
-            --dark-purple: #4a235a;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--dark-purple);
-            color: var(--text-dark);
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #gallery-menu {
-            background-color: var(--bg-color);
-            width: 80%;
-            height: 100vh; /* FULL SCREEN HEIGHT – no more squishing */
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-            padding: 30px 30px;
-            box-sizing: border-box;
-        }
-
-        .menu-header {
-            padding: 0 0 20px 0;
-            font-weight: bold;
-            color: var(--dark-purple);
-            border-bottom: 2px solid var(--header-pink);
-            display: flex;
-            justify-content: space-between;
-            flex-shrink: 0;
-        }
-
-        .grid-container {
-            padding: 30px 0; /* vertical padding only, extra space above first row and below last row */
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 60px 35px; /* row gap (vertical) = 60px, column gap (horizontal) = 35px (unchanged) */
-            overflow-y: auto;
-            flex-grow: 1;
-            align-content: start;
-        }
-
-        .grid-item {
-            background-color: #e0e0e0;
-            border-radius: 5px;
-            cursor: pointer;
-            aspect-ratio: 4 / 3; /* TALLER IMAGES – more vertical presence */
-            width: 100%;
-            overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: #999;
-        }
-
-        .grid-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
-        }
-
-        .grid-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        #image-viewer {
-            display: none;
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--dark-purple);
-            flex-direction: column;
-            z-index: 100;
-        }
-
-        .main-image-container {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            background-color: #2a0845;
-            padding: 20px;
-        }
-
-        .main-image-container img {
-            max-width: 90%;
-            max-height: 70vh;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-        }
-
-        .info-bar {
-            background-color: rgba(0, 0, 0, 0.8);
-            color: #aaa;
-            text-align: center;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 14px;
-        }
-
-        .carousel-container {
-            height: 150px;
-            background-color: var(--dark-purple);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 50px;
-            position: relative;
-        }
-
-        .carousel-track {
-            display: flex;
-            gap: 20px;
-            overflow-x: auto;
-            max-width: 75%;
-            padding: 10px;
-            scrollbar-width: none;
-        }
-        .carousel-track::-webkit-scrollbar { display: none; }
-
-        .thumb {
-            width: 160px;
-            height: 90px;
-            flex-shrink: 0;
-            background-color: #333;
-            cursor: pointer;
-            opacity: 0.6;
-            transition: opacity 0.2s, transform 0.2s;
-            border: 2px solid transparent;
-        }
-
-        .thumb:hover, .thumb.active { opacity: 1; }
-        .thumb.active { border-color: var(--accent-pink); transform: scale(1.05); }
-        .thumb img { width: 100%; height: 100%; object-fit: cover; }
-
-        .arrow {
-            font-size: 40px;
-            color: var(--accent-pink);
-            cursor: pointer;
-            user-select: none;
-            padding: 0 25px;
-        }
-        .arrow:hover { color: #ff99cc; }
-
-        .viewer-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 50px;
-            display: flex;
-            gap: 20px;
-            color: white;
-            font-size: 18px;
-        }
-
-        .btn-control { cursor: pointer; transition: color 0.2s; }
-        .btn-control:hover { color: var(--header-pink); }
-    </style>
-</head>
-<body>
-
-    <!-- VIEW 1: Gallery Menu -->
-    <div id="gallery-menu">
-        <div class="menu-header">
-            <span>Pictures</span>
-            <span style="cursor: pointer;" onclick="closeViewer()">&times;</span>
-        </div>
-        <div class="grid-container" id="grid-container">
-            <!-- Dynamic items go here -->
-        </div>
-    </div>
-
-    <!-- VIEW 2: Detailed Viewer -->
-    <div id="image-viewer">
-        <div class="main-image-container">
-            <img id="main-display-img" src="" alt="Selected Image">
-        </div>
-        <div class="info-bar" id="info-bar">
-            Loading images from GitHub...
-        </div>
-        
-        <div class="carousel-container">
-            <div class="arrow" onclick="changeImage(-1)">&#9664;</div>
-            <div class="carousel-track" id="carousel-track">
-                <!-- Dynamic thumbnails go here -->
-            </div>
-            <div class="arrow" onclick="changeImage(1)">&#9654;</div>
-            
-            <div class="viewer-controls">
-                <div class="btn-control">Set Wallpaper</div>
-                <div class="btn-control" onclick="closeViewer()">Back</div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // --- CONFIGURATION ---
-        const GITHUB_USERNAME = "QuestionBlock64";
-        const REPO_NAME = "The-Bee-Folder";       
-        const FOLDER_NAME = "The Bee Folder";     
-
-        let imageFiles = [];
-        let currentIndex = 0;
-
-        const gridContainer = document.getElementById('grid-container');
-        const galleryMenu = document.getElementById('gallery-menu');
-        const imageViewer = document.getElementById('image-viewer');
-        const mainDisplayImg = document.getElementById('main-display-img');
-        const carouselTrack = document.getElementById('carousel-track');
-        const infoBar = document.getElementById('info-bar');
-
-        // Fetch file list dynamically via GitHub API
-        async function fetchImagesFromGitHub() {
-            const encodedFolder = encodeURIComponent(FOLDER_NAME);
-            const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${encodedFolder}`;
-
-            try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error("Could not read repo. Check repo name and visibility.");
-                
-                const files = await response.json();
-                
-                const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
-                
-                imageFiles = files
-                    .filter(file => file.type === 'file' && validExtensions.some(ext => file.name.toLowerCase().endsWith(ext)))
-                    .map(file => ({
-                        name: file.name,
-                        url: file.download_url
-                    }));
-
-                if (imageFiles.length === 0) {
-                    infoBar.innerText = "No images found in the specified folder.";
-                    return;
-                }
-
-                infoBar.innerText = `[ACQUISITION PROCEDURE] Loaded ${imageFiles.length} images.`;
-                buildGallery();
-
-            } catch (error) {
-                console.error(error);
-                infoBar.innerText = "Error: Couldn't connect to the repository folder. Ensure it is Public.";
-            }
-        }
-
-        function buildGallery() {
-            gridContainer.innerHTML = '';
-            carouselTrack.innerHTML = '';
-
-            imageFiles.forEach((file, index) => {
-                const gridItem = document.createElement('div');
-                gridItem.className = 'grid-item';
-                gridItem.innerHTML = `<img src="${file.url}" alt="${file.name}" loading="lazy">`;
-                gridItem.onclick = () => openViewer(index);
-                gridContainer.appendChild(gridItem);
-
-                const thumb = document.createElement('div');
-                thumb.className = 'thumb';
-                thumb.id = `thumb-${index}`;
-                thumb.innerHTML = `<img src="${file.url}" alt="Thumb ${index}" loading="lazy">`;
-                thumb.onclick = () => setImage(index);
-                carouselTrack.appendChild(thumb);
-            });
-
-            // Fill remaining slots so the last row completes 6 columns
-            const remaining = (6 - (imageFiles.length % 6)) % 6;
-            for(let i=0; i < remaining; i++) {
-                const emptySlot = document.createElement('div');
-                emptySlot.className = 'grid-item';
-                emptySlot.innerHTML = '&#9862;';
-                emptySlot.style.cursor = 'default';
-                emptySlot.onclick = null;
                 gridContainer.appendChild(emptySlot);
             }
         }
