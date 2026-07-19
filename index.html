@@ -256,8 +256,8 @@
 </head>
 <body>
 
-    <!-- Music credit popup -->
-    <div id="music-credit">Music by MakenCat</div>
+    <!-- Music credit popup with music note symbol -->
+    <div id="music-credit">♪ Music by MakenCat</div>
 
     <!-- Hidden audio element with the correct file name -->
     <audio id="bg-music" loop preload="auto">
@@ -289,7 +289,6 @@
             <div class="arrow" onclick="changeImage(1)">&#9654;</div>
             
             <div class="viewer-controls">
-                <div class="btn-control">Set Wallpaper</div>
                 <div class="btn-control" onclick="closeViewer()">Back</div>
             </div>
         </div>
@@ -581,6 +580,18 @@
                 mainDisplayImg.style.opacity = '1';
             }, 400);
         }
+
+        // ---------- Keyboard shortcut for Escape ----------
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                if (isFullscreen) {
+                    exitFullscreen();
+                } else if (imageViewer.style.display === 'flex') {
+                    closeViewer();
+                }
+                // If neither, do nothing (already in gallery)
+            }
+        });
 
         mainDisplayImg.addEventListener('click', (e) => {
             e.stopPropagation();
