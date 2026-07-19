@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Bee Folder</title>
-    <!-- Favicon using folder.png from the repository -->
     <link rel="icon" type="image/png" href="folder.png">
     <style>
         :root {
@@ -28,6 +27,31 @@
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        /* Music credit popup */
+        #music-credit {
+            position: fixed;
+            top: 15px;
+            left: -350px;
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            padding: 10px 25px;
+            border-radius: 0 8px 8px 0;
+            font-size: 16px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            z-index: 3000;
+            pointer-events: none;
+            animation: slideInOut 6s ease-in-out forwards;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        @keyframes slideInOut {
+            0%   { left: -350px; opacity: 0; }
+            8%   { left: 0; opacity: 1; }
+            92%  { left: 0; opacity: 1; }
+            100% { left: -350px; opacity: 0; }
         }
 
         #gallery-menu {
@@ -182,7 +206,6 @@
         .btn-control { cursor: pointer; transition: color 0.2s; }
         .btn-control:hover { color: var(--header-pink); }
 
-        /* Fullscreen overlay with darkened BeeDoodleBackground */
         #fullscreen-overlay {
             display: none;
             position: fixed;
@@ -198,7 +221,6 @@
             align-items: center;
         }
 
-        /* Dark overlay on top of the background */
         #fullscreen-overlay::before {
             content: '';
             position: absolute;
@@ -234,6 +256,15 @@
 </head>
 <body>
 
+    <!-- Music credit popup -->
+    <div id="music-credit">Music by MakenCat</div>
+
+    <!-- Hidden audio element with the correct file name -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="BackgroundMusic.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
     <div id="gallery-menu">
         <div class="menu-header">
             <span>Pictures</span>
@@ -264,12 +295,30 @@
         </div>
     </div>
 
-    <!-- Fullscreen overlay -->
     <div id="fullscreen-overlay">
         <img id="fullscreen-img" src="" alt="Fullscreen Image">
     </div>
 
     <script>
+        // ---------- Background Music ----------
+        const bgMusic = document.getElementById('bg-music');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const playPromise = bgMusic.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                    // Autoplay blocked; will start on first click
+                });
+            }
+        });
+
+        document.addEventListener('click', () => {
+            if (bgMusic.paused) {
+                bgMusic.play().catch(() => {});
+            }
+        }, { once: true });
+
+        // ---------- Gallery Logic ----------
         const GITHUB_USERNAME = "QuestionBlock64";
         const REPO_NAME = "The-Bee-Folder";        
         const FOLDER_NAME = "The Bee Folder";      
@@ -456,7 +505,6 @@
             setImage(newIndex);
         }
 
-        // Fullscreen logic
         function enterFullscreen() {
             if (isFullscreen) return;
             const startRect = mainDisplayImg.getBoundingClientRect();
