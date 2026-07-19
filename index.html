@@ -30,7 +30,7 @@
             width: 80%;
             height: 80%;
             border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -49,12 +49,12 @@
         .grid-container {
             padding: 30px;
             display: grid;
-            grid-template-columns: repeat(6, 1fr); /* STRICTLY 6 COLUMNS PER ROW */
+            grid-template-columns: repeat(6, 1fr);
             gap: 25px;
             overflow-y: auto;
             flex-grow: 1;
-            min-height: 0; /* FORCES SCROLLING INSTEAD OF SQUISHING */
-            align-content: start; 
+            align-content: start;
+            /* 6 images per row */;
         }
 
         .grid-item {
@@ -66,6 +66,11 @@
             overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #999;
         }
 
         .grid-item:hover {
@@ -83,7 +88,10 @@
         #image-viewer {
             display: none;
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background-color: var(--dark-purple);
             flex-direction: column;
             z-index: 100;
@@ -102,7 +110,7 @@
         .main-image-container img {
             max-width: 90%;
             max-height: 70vh;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
         }
 
         .info-bar {
@@ -132,7 +140,9 @@
             padding: 10px;
             scrollbar-width: none;
         }
-        .carousel-track::-webkit-scrollbar { display: none; }
+        .carousel-track::-webkit-scrollbar {
+            display: none;
+        }
 
         .thumb {
             width: 160px;
@@ -141,13 +151,25 @@
             background-color: #333;
             cursor: pointer;
             opacity: 0.6;
-            transition: opacity 0.2s, transform 0.2s;
+            transition:
+                opacity 0.2s,
+                transform 0.2s;
             border: 2px solid transparent;
         }
 
-        .thumb:hover, .thumb.active { opacity: 1; }
-        .thumb.active { border-color: var(--accent-pink); transform: scale(1.05); }
-        .thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .thumb:hover,
+        .thumb.active {
+            opacity: 1;
+        }
+        .thumb.active {
+            border-color: var(--accent-pink);
+            transform: scale(1.05);
+        }
+        .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
         .arrow {
             font-size: 40px;
@@ -156,7 +178,9 @@
             user-select: none;
             padding: 0 20px;
         }
-        .arrow:hover { color: #ff99cc; }
+        .arrow:hover {
+            color: #ff99cc;
+        }
 
         .viewer-controls {
             position: absolute;
@@ -168,19 +192,12 @@
             font-size: 18px;
         }
 
-        .btn-control { cursor: pointer; transition: color 0.2s; }
-        .btn-control:hover { color: var(--header-pink); }
-
-        /* Media query for smaller screens so it doesn't get unreadably small on phones */
-        @media (max-width: 1200px) {
-            .grid-container {
-                grid-template-columns: repeat(4, 1fr);
-            }
+        .btn-control {
+            cursor: pointer;
+            transition: color 0.2s;
         }
-        @media (max-width: 800px) {
-            .grid-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .btn-control:hover {
+            color: var(--header-pink);
         }
     </style>
 </head>
@@ -190,7 +207,7 @@
     <div id="gallery-menu">
         <div class="menu-header">
             <span>Pictures</span>
-            <span style="cursor: pointer;" onclick="closeViewer()">&times;</span>
+            <span style="cursor: pointer" onclick="closeViewer()">&times;</span>
         </div>
         <div class="grid-container" id="grid-container">
             <!-- Dynamic items go here -->
@@ -200,19 +217,17 @@
     <!-- VIEW 2: Detailed Viewer -->
     <div id="image-viewer">
         <div class="main-image-container">
-            <img id="main-display-img" src="" alt="Selected Image">
+            <img id="main-display-img" src="" alt="Selected Image" />
         </div>
-        <div class="info-bar" id="info-bar">
-            Loading images from GitHub...
-        </div>
-        
+        <div class="info-bar" id="info-bar">Loading images from GitHub...</div>
+
         <div class="carousel-container">
             <div class="arrow" onclick="changeImage(-1)">&#9664;</div>
             <div class="carousel-track" id="carousel-track">
                 <!-- Dynamic thumbnails go here -->
             </div>
             <div class="arrow" onclick="changeImage(1)">&#9654;</div>
-            
+
             <div class="viewer-controls">
                 <div class="btn-control">Set Wallpaper</div>
                 <div class="btn-control" onclick="closeViewer()">Back</div>
@@ -222,9 +237,9 @@
 
     <script>
         // --- CONFIGURATION ---
-        const GITHUB_USERNAME = "QuestionBlock64";
-        const REPO_NAME = "The-Bee-Folder";       // The repository name
-        const FOLDER_NAME = "The Bee Folder";     // The folder inside the repository
+        const GITHUB_USERNAME = 'QuestionBlock64';
+        const REPO_NAME = 'The-Bee-Folder';
+        const FOLDER_NAME = 'The Bee Folder';
 
         let imageFiles = [];
         let currentIndex = 0;
@@ -243,32 +258,37 @@
 
             try {
                 const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error("Could not read repo. Check repo name and visibility.");
-                
+                if (!response.ok)
+                    throw new Error('Could not read repo. Check repo name and visibility.');
+
                 const files = await response.json();
-                
+
                 // Filter out non-image files
                 const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
-                
+
                 // Save both the filename AND the direct download URL
                 imageFiles = files
-                    .filter(file => file.type === 'file' && validExtensions.some(ext => file.name.toLowerCase().endsWith(ext)))
-                    .map(file => ({
+                    .filter(
+                        (file) =>
+                            file.type === 'file' &&
+                            validExtensions.some((ext) => file.name.toLowerCase().endsWith(ext)),
+                    )
+                    .map((file) => ({
                         name: file.name,
-                        url: file.download_url
+                        url: file.download_url,
                     }));
 
                 if (imageFiles.length === 0) {
-                    infoBar.innerText = "No images found in the specified folder.";
+                    infoBar.innerText = 'No images found in the specified folder.';
                     return;
                 }
 
                 infoBar.innerText = `[ACQUISITION PROCEDURE] Loaded ${imageFiles.length} images.`;
                 buildGallery();
-
             } catch (error) {
                 console.error(error);
-                infoBar.innerText = "Error: Couldn't connect to the repository folder. Ensure it is Public.";
+                infoBar.innerText =
+                    "Error: Couldn't connect to the repository folder. Ensure it is Public.";
             }
         }
 
@@ -277,7 +297,7 @@
             carouselTrack.innerHTML = '';
 
             imageFiles.forEach((file, index) => {
-                // 1. Grid Menu Item (Uses direct download URL)
+                // 1. Grid Menu Item
                 const gridItem = document.createElement('div');
                 gridItem.className = 'grid-item';
                 gridItem.innerHTML = `<img src="${file.url}" alt="${file.name}" loading="lazy">`;
@@ -293,12 +313,15 @@
                 carouselTrack.appendChild(thumb);
             });
 
-            // Aesthetic spacer slots (adjusted to 18 minimum to look clean in a 6-column grid)
-            const emptySlotsNeeded = Math.max(0, 18 - imageFiles.length);
-            for(let i=0; i < emptySlotsNeeded; i++) {
+            // Fill remaining slots in the last row to complete a full row of 6
+            const remainingSlots = (6 - (imageFiles.length % 6)) % 6;
+            const emptySlotsNeeded = remainingSlots;
+            for (let i = 0; i < emptySlotsNeeded; i++) {
                 const emptySlot = document.createElement('div');
                 emptySlot.className = 'grid-item';
                 emptySlot.innerHTML = '&#9862;';
+                emptySlot.style.cursor = 'default';
+                emptySlot.onclick = null;
                 gridContainer.appendChild(emptySlot);
             }
         }
@@ -317,14 +340,13 @@
         function setImage(index) {
             currentIndex = index;
             const file = imageFiles[index];
-            
-            // Set the main image to the direct download URL
+
             mainDisplayImg.src = file.url;
             infoBar.innerText = `[VIEWING] ${file.name}`;
 
-            document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.thumb').forEach((t) => t.classList.remove('active'));
             const activeThumb = document.getElementById(`thumb-${index}`);
-            if(activeThumb) {
+            if (activeThumb) {
                 activeThumb.classList.add('active');
                 activeThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
             }
@@ -333,10 +355,10 @@
         function changeImage(direction) {
             if (imageFiles.length === 0) return;
             let newIndex = currentIndex + direction;
-            
+
             if (newIndex < 0) newIndex = imageFiles.length - 1;
             if (newIndex >= imageFiles.length) newIndex = 0;
-            
+
             setImage(newIndex);
         }
 
