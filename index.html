@@ -49,11 +49,12 @@
         .grid-container {
             padding: 30px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-template-columns: repeat(6, 1fr); /* STRICTLY 6 COLUMNS PER ROW */
             gap: 25px;
             overflow-y: auto;
             flex-grow: 1;
-            align-content: start; /* Fixes vertical squishing */
+            min-height: 0; /* FORCES SCROLLING INSTEAD OF SQUISHING */
+            align-content: start; 
         }
 
         .grid-item {
@@ -169,6 +170,18 @@
 
         .btn-control { cursor: pointer; transition: color 0.2s; }
         .btn-control:hover { color: var(--header-pink); }
+
+        /* Media query for smaller screens so it doesn't get unreadably small on phones */
+        @media (max-width: 1200px) {
+            .grid-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        @media (max-width: 800px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
@@ -210,8 +223,8 @@
     <script>
         // --- CONFIGURATION ---
         const GITHUB_USERNAME = "QuestionBlock64";
-        const REPO_NAME = "The-Bee-Folder";       
-        const FOLDER_NAME = "The Bee Folder";     
+        const REPO_NAME = "The-Bee-Folder";       // The repository name
+        const FOLDER_NAME = "The Bee Folder";     // The folder inside the repository
 
         let imageFiles = [];
         let currentIndex = 0;
@@ -264,7 +277,7 @@
             carouselTrack.innerHTML = '';
 
             imageFiles.forEach((file, index) => {
-                // 1. Grid Menu Item
+                // 1. Grid Menu Item (Uses direct download URL)
                 const gridItem = document.createElement('div');
                 gridItem.className = 'grid-item';
                 gridItem.innerHTML = `<img src="${file.url}" alt="${file.name}" loading="lazy">`;
@@ -280,8 +293,8 @@
                 carouselTrack.appendChild(thumb);
             });
 
-            // Aesthetic spacer slots
-            const emptySlotsNeeded = Math.max(0, 16 - imageFiles.length);
+            // Aesthetic spacer slots (adjusted to 18 minimum to look clean in a 6-column grid)
+            const emptySlotsNeeded = Math.max(0, 18 - imageFiles.length);
             for(let i=0; i < emptySlotsNeeded; i++) {
                 const emptySlot = document.createElement('div');
                 emptySlot.className = 'grid-item';
@@ -305,6 +318,7 @@
             currentIndex = index;
             const file = imageFiles[index];
             
+            // Set the main image to the direct download URL
             mainDisplayImg.src = file.url;
             infoBar.innerText = `[VIEWING] ${file.name}`;
 
