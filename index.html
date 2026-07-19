@@ -28,33 +28,32 @@
         #gallery-menu {
             background-color: var(--bg-color);
             width: 80%;
-            height: 80%;
+            height: 100vh; /* FULL SCREEN HEIGHT – no more squishing */
             border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             position: relative;
-            /* Increased top/bottom padding for more vertical breathing room */
             padding: 30px 30px;
             box-sizing: border-box;
         }
 
         .menu-header {
-            padding: 0 0 20px 0; /* more space under header */
+            padding: 0 0 20px 0;
             font-weight: bold;
             color: var(--dark-purple);
             border-bottom: 2px solid var(--header-pink);
             display: flex;
             justify-content: space-between;
+            flex-shrink: 0;
         }
 
         .grid-container {
             padding: 30px 0; /* vertical padding only, extra space above first row and below last row */
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            /* Row gap (vertical) increased to 50px, column gap (horizontal) stays 35px */
-            gap: 50px 35px;
+            gap: 60px 35px; /* row gap (vertical) = 60px, column gap (horizontal) = 35px (unchanged) */
             overflow-y: auto;
             flex-grow: 1;
             align-content: start;
@@ -64,7 +63,7 @@
             background-color: #e0e0e0;
             border-radius: 5px;
             cursor: pointer;
-            aspect-ratio: 16/9;
+            aspect-ratio: 4 / 3; /* TALLER IMAGES – more vertical presence */
             width: 100%;
             overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
