@@ -16,7 +16,6 @@
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* Normal view background */
             background-image: url('Background.png');
             background-size: cover;
             background-position: center;
@@ -89,7 +88,6 @@
             display: none;
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            /* Full view doodle background */
             background-image: url('BeeDoodleBackground.png');
             background-size: cover;
             background-position: center;
@@ -113,6 +111,7 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.8);
             object-fit: contain;
             transition: opacity 0.3s ease;
+            cursor: pointer;
         }
 
         .info-bar {
@@ -181,6 +180,44 @@
         .btn-control { cursor: pointer; transition: color 0.2s; }
         .btn-control:hover { color: var(--header-pink); }
 
+        /* Fullscreen overlay with darkened BeeDoodleBackground */
+        #fullscreen-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('BeeDoodleBackground.png');
+            background-size: cover;
+            background-position: center;
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Dark overlay on top of the background */
+        #fullscreen-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7); /* darkens the doodle background */
+            z-index: 0;
+        }
+
+        #fullscreen-overlay img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            box-shadow: 0 0 30px rgba(0,0,0,0.9);
+            cursor: pointer;
+            position: relative; /* ensure image is above the dark overlay */
+            z-index: 1;
+        }
+
         @media (max-width: 1200px) {
             .grid-container {
                 grid-template-columns: repeat(4, 1fr);
@@ -225,6 +262,11 @@
         </div>
     </div>
 
+    <!-- Fullscreen overlay -->
+    <div id="fullscreen-overlay">
+        <img id="fullscreen-img" src="" alt="Fullscreen Image">
+    </div>
+
     <script>
         const GITHUB_USERNAME = "QuestionBlock64";
         const REPO_NAME = "The-Bee-Folder";        
@@ -239,6 +281,10 @@
         const mainDisplayImg = document.getElementById('main-display-img');
         const carouselTrack = document.getElementById('carousel-track');
         const infoBar = document.getElementById('info-bar');
+        const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+        const fullscreenImg = document.getElementById('fullscreen-img');
+
+        let isFullscreen = false;
 
         async function fetchImagesFromGitHub() {
             const encodedFolder = encodeURIComponent(FOLDER_NAME);
@@ -281,6 +327,7 @@
         }
 
         function openViewer(index, event) {
+            if (isFullscreen) return;
             const clickedItem = event.currentTarget;
             const startRect = clickedItem.getBoundingClientRect();
             const imageUrl = imageFiles[index].url;
@@ -336,6 +383,7 @@
         }
 
         function closeViewer() {
+            if (isFullscreen) return;
             const targetGridItem = gridContainer.children[currentIndex];
             if (!targetGridItem) {
                 imageViewer.style.display = 'none';
@@ -399,12 +447,108 @@
         }
 
         function changeImage(direction) {
-            if (imageFiles.length === 0) return;
+            if (imageFiles.length === 0 || isFullscreen) return;
             let newIndex = currentIndex + direction;
             if (newIndex < 0) newIndex = imageFiles.length - 1;
             if (newIndex >= imageFiles.length) newIndex = 0;
             setImage(newIndex);
         }
+
+        // Fullscreen logic
+        function enterFullscreen() {
+            if (isFullscreen) return;
+            const startRect = mainDisplayImg.getBoundingClientRect();
+
+            const clone = document.createElement('img');
+            clone.src = mainDisplayImg.src;
+            clone.style.position = 'fixed';
+            clone.style.top = startRect.top + 'px';
+            clone.style.left = startRect.left + 'px';
+            clone.style.width = startRect.width + 'px';
+            clone.style.height = startRect.height + 'px';
+            clone.style.zIndex = '2001';
+            clone.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            clone.style.pointerEvents = 'none';
+            clone.style.objectFit = 'contain';
+            clone.style.boxShadow = '0 0 20px rgba(0,0,0,0.8)';
+            clone.style.borderRadius = '0';
+            document.body.appendChild(clone);
+
+            clone.offsetHeight;
+
+            clone.style.top = '0';
+            clone.style.left = '0';
+            clone.style.width = '100vw';
+            clone.style.height = '100vh';
+            clone.style.boxShadow = 'none';
+
+            fullscreenImg.src = mainDisplayImg.src;
+            fullscreenOverlay.style.display = 'flex';
+            fullscreenImg.style.opacity = '0';
+
+            setTimeout(() => {
+                clone.remove();
+                fullscreenImg.style.opacity = '1';
+                isFullscreen = true;
+            }, 400);
+        }
+
+        function exitFullscreen() {
+            if (!isFullscreen) return;
+            const startRect = fullscreenImg.getBoundingClientRect();
+            const targetRect = mainDisplayImg.getBoundingClientRect();
+
+            const clone = document.createElement('img');
+            clone.src = fullscreenImg.src;
+            clone.style.position = 'fixed';
+            clone.style.top = startRect.top + 'px';
+            clone.style.left = startRect.left + 'px';
+            clone.style.width = startRect.width + 'px';
+            clone.style.height = startRect.height + 'px';
+            clone.style.zIndex = '2001';
+            clone.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            clone.style.pointerEvents = 'none';
+            clone.style.objectFit = 'contain';
+            clone.style.boxShadow = 'none';
+            clone.style.borderRadius = '0';
+            document.body.appendChild(clone);
+
+            fullscreenImg.style.opacity = '0';
+
+            clone.offsetHeight;
+
+            clone.style.top = targetRect.top + 'px';
+            clone.style.left = targetRect.left + 'px';
+            clone.style.width = targetRect.width + 'px';
+            clone.style.height = targetRect.height + 'px';
+            clone.style.boxShadow = '0 0 20px rgba(0,0,0,0.8)';
+
+            setTimeout(() => {
+                clone.remove();
+                fullscreenOverlay.style.display = 'none';
+                fullscreenImg.style.opacity = '1';
+                isFullscreen = false;
+                mainDisplayImg.style.opacity = '1';
+            }, 400);
+        }
+
+        mainDisplayImg.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isFullscreen) return;
+            if (imageFiles.length === 0) return;
+            enterFullscreen();
+        });
+
+        fullscreenImg.addEventListener('click', (e) => {
+            e.stopPropagation();
+            exitFullscreen();
+        });
+
+        fullscreenOverlay.addEventListener('click', (e) => {
+            if (e.target === fullscreenOverlay) {
+                exitFullscreen();
+            }
+        });
 
         fetchImagesFromGitHub();
     </script>
