@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+    <style>
+        /* Base Styling & Theme */
+        :root {
+            --bg-color: #fcecf4; /* Light pink background */
+            --header-pink: #ffb6c1;
+            --accent-pink: #ff69b4;
+            --text-dark: #4a4a4a;
+            --dark-purple: #4a235a;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark-purple);
+            color: var(--text-dark);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- View 1: Gallery Menu (Grid) --- */
+        #gallery-menu {
+            background-color: var(--bg-color);
+            width: 80%;
+            height: 80%;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .menu-header {
+            padding: 15px 20px;
+            font-weight: bold;
+            color: var(--dark-purple);
+            border-bottom: 2px solid var(--header-pink);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .grid-container {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .grid-item {
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #aaa;
+        }
+
+        .grid-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+        }
+
+        .grid-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* --- View 2: Detailed Image Viewer --- */
+        #image-viewer {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--dark-purple);
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .main-image-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background-color: #2a0845;
+            padding: 20px;
+        }
+
+        .main-image-container img {
+            max-width: 90%;
+            max-height: 70vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .info-bar {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #aaa;
+            text-align: center;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        /* Bottom Thumbnail Carousel */
+        .carousel-container {
+            height: 150px;
+            background-color: var(--dark-purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .carousel-track {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            max-width: 70%;
+            padding: 10px;
+            scrollbar-width: none; /* Hide scrollbar Firefox */
+        }
+        .carousel-track::-webkit-scrollbar { display: none; /* Hide scrollbar Chrome/Safari */ }
+
+        .thumb {
+            width: 160px;
+            height: 90px;
+            flex-shrink: 0;
+            background-color: #333;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s, transform 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .thumb:hover, .thumb.active {
+            opacity: 1;
+        }
+
+        .thumb.active {
+            border-color: var(--accent-pink);
+            transform: scale(1.05);
+        }
+
+        .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Controls */
+        .arrow {
+            font-size: 40px;
+            color: var(--accent-pink);
+            cursor: pointer;
+            user-select: none;
+            padding: 0 20px;
+        }
+
+        .arrow:hover { color: #ff99cc; }
+
+        .viewer-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
+            display: flex;
+            gap: 20px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .btn-control {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .btn-control:hover {
+            color: var(--header-pink);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- VIEW 1: Gallery Menu -->
+    <div id="gallery-menu">
+        <div class="menu-header">
+            <span>Pictures</span>
+            <span style="cursor: pointer;">&times;</span>
+        </div>
+        <div class="grid-container" id="grid-container">
+            <!-- Grid items injected via JS -->
+        </div>
+    </div>
+
+    <!-- VIEW 2: Detailed Viewer -->
+    <div id="image-viewer">
+        <div class="main-image-container">
+            <img id="main-display-img" src="" alt="Selected Image">
+        </div>
+        <div class="info-bar" id="info-bar">
+            [ACQUISITION PROCEDURE] Select an image to view details.
+        </div>
+        
+        <div class="carousel-container">
+            <div class="arrow" onclick="changeImage(-1)">&#9664;</div>
+            <div class="carousel-track" id="carousel-track">
+                <!-- Thumbnails injected via JS -->
+            </div>
+            <div class="arrow" onclick="changeImage(1)">&#9654;</div>
+            
+            <div class="viewer-controls">
+                <div class="btn-control">Set Wallpaper</div>
+                <div class="btn-control" onclick="closeViewer()">Back</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // Add your exact image filenames here. 
+        // The script expects them to be in a folder named "The Bee Folder" in the same directory as this HTML file.
+        const imageFiles = [
+            "image_6afe43.jpg",
+            "image_6b0526.jpg",
+            // Add more filenames like "bee1.png", "bee2.jpg", etc.
+        ];
+
+        const FOLDER_NAME = "The Bee Folder";
+        let currentIndex = 0;
+
+        // --- DOM Elements ---
+        const gridContainer = document.getElementById('grid-container');
+        const galleryMenu = document.getElementById('gallery-menu');
+        const imageViewer = document.getElementById('image-viewer');
+        const mainDisplayImg = document.getElementById('main-display-img');
+        const carouselTrack = document.getElementById('carousel-track');
+        const infoBar = document.getElementById('info-bar');
+
+        // --- Initialization ---
+        function initGallery() {
+            // Generate Grid and Carousel Thumbnails
+            imageFiles.forEach((file, index) => {
+                const imagePath = `${FOLDER_NAME}/${file}`;
+
+                // 1. Create Grid Item
+                const gridItem = document.createElement('div');
+                gridItem.className = 'grid-item';
+                gridItem.innerHTML = `<img src="${imagePath}" alt="${file}" onerror="this.parentElement.innerHTML='Image Not Found'">`;
+                gridItem.onclick = () => openViewer(index);
+                gridContainer.appendChild(gridItem);
+
+                // 2. Create Carousel Thumbnail
+                const thumb = document.createElement('div');
+                thumb.className = 'thumb';
+                thumb.id = `thumb-${index}`;
+                thumb.innerHTML = `<img src="${imagePath}" alt="Thumb ${index}">`;
+                thumb.onclick = () => setImage(index);
+                carouselTrack.appendChild(thumb);
+            });
+
+            // Fill empty grid slots with placeholders to match the screenshot aesthetic
+            const emptySlotsNeeded = 16 - imageFiles.length; // Ensure at least 16 slots total
+            for(let i=0; i < emptySlotsNeeded; i++) {
+                const emptySlot = document.createElement('div');
+                emptySlot.className = 'grid-item';
+                emptySlot.innerHTML = '&#9862;'; // Placeholder icon
+                gridContainer.appendChild(emptySlot);
+            }
+        }
+
+        // --- Viewer Logic ---
+        function openViewer(index) {
+            galleryMenu.style.display = 'none';
+            imageViewer.style.display = 'flex';
+            setImage(index);
+        }
+
+        function closeViewer() {
+            imageViewer.style.display = 'none';
+            galleryMenu.style.display = 'flex';
+        }
+
+        function setImage(index) {
+            currentIndex = index;
+            const file = imageFiles[index];
+            mainDisplayImg.src = `${FOLDER_NAME}/${file}`;
+            infoBar.innerText = `[VIEWING] ${file}`;
+
+            // Update active thumbnail styling
+            document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+            const activeThumb = document.getElementById(`thumb-${index}`);
+            if(activeThumb) {
+                activeThumb.classList.add('active');
+                activeThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
+        }
+
+        function changeImage(direction) {
+            if (imageFiles.length === 0) return;
+            let newIndex = currentIndex + direction;
+            
+            // Loop around if at the ends
+            if (newIndex < 0) newIndex = imageFiles.length - 1;
+            if (newIndex >= imageFiles.length) newIndex = 0;
+            
+            setImage(newIndex);
+        }
+
+        // Run setup
+        initGallery();
+    </script>
+</body>
+</html>
