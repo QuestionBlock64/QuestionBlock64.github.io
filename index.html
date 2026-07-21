@@ -309,7 +309,7 @@
 
         body.is-mobile .grid-container {
             grid-template-columns: repeat(3, 1fr);
-            row-gap: 12px;
+            row-gap: 40px;      /* Much larger vertical gap to prevent overlapping */
             column-gap: 8px;
             padding: 8px 8px 50px 8px;
         }
@@ -376,7 +376,7 @@
         @media (max-width: 700px) {
             body.is-mobile .grid-container {
                 grid-template-columns: repeat(2, 1fr);
-                row-gap: 10px;
+                row-gap: 30px;   /* Still plenty of space on very small screens */
                 column-gap: 6px;
                 padding: 6px 6px 40px 6px;
             }
