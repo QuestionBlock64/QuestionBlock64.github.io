@@ -71,6 +71,9 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            /* iOS fix: ensure the background covers the whole viewport */
+            background-attachment: scroll;
+            -webkit-background-size: cover;
             color: var(--text-dark);
             height: 100vh;
             overflow: hidden;
@@ -79,7 +82,7 @@
             align-items: center;
         }
 
-        /* Music credit popup – hidden by default, animation only applied when .show-credit class added */
+        /* Music credit popup – hidden by default */
         #music-credit {
             position: fixed;
             top: 15px;
@@ -94,7 +97,7 @@
             z-index: 3000;
             pointer-events: none;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            opacity: 0; /* hidden until animation */
+            opacity: 0;
         }
 
         #music-credit.show-credit {
@@ -172,6 +175,10 @@
             background-image: url('BeeDoodleBackground.png');
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
+            /* iOS background fix */
+            background-attachment: scroll;
+            -webkit-background-size: cover;
             flex-direction: column;
             z-index: 100;
         }
@@ -273,6 +280,10 @@
             background-image: url('BeeDoodleBackground.png');
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
+            /* iOS background fix */
+            background-attachment: scroll;
+            -webkit-background-size: cover;
             z-index: 2000;
             justify-content: center;
             align-items: center;
@@ -434,7 +445,6 @@
         <p>This site is best viewed in landscape mode. Turn your phone sideways to continue.</p>
     </div>
 
-    <!-- Music credit popup – initially hidden, shown when music starts -->
     <div id="music-credit">♪ Music by MakenCat</div>
 
     <audio id="bg-music" loop preload="auto">
@@ -518,13 +528,11 @@
         const musicCredit = document.getElementById('music-credit');
 
         function showMusicCredit() {
-            // Only show if not already visible (animation may be running)
             if (!musicCredit.classList.contains('show-credit')) {
                 musicCredit.classList.add('show-credit');
-                // Remove the class after animation ends so it can be re-triggered if needed
                 setTimeout(() => {
                     musicCredit.classList.remove('show-credit');
-                }, 6000); // matches animation duration
+                }, 6000);
             }
         }
 
@@ -575,20 +583,16 @@
             navigator.mediaSession.setActionHandler('nexttrack', null);
         }
 
-        // Attempt autoplay
         async function attemptAutoplay() {
             try {
                 await bgMusic.play();
-                // Autoplay succeeded
                 showMusicCredit();
                 updateMediaSessionArtwork();
             } catch (err) {
-                // Autoplay blocked – wait for user interaction
                 console.log('Autoplay prevented, waiting for user interaction.');
             }
         }
 
-        // User interaction handler
         function handleUserInteraction() {
             if (bgMusic.paused) {
                 bgMusic.play().then(() => {
@@ -603,7 +607,6 @@
 
         window.addEventListener('DOMContentLoaded', attemptAutoplay);
 
-        // Update media session playback state on play/pause
         bgMusic.addEventListener('play', () => {
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.playbackState = 'playing';
