@@ -14,7 +14,7 @@
             --dark-purple: #4a235a;
         }
 
-        /* ---------- ROTATION LOCK OVERLAY ---------- */
+        /* Rotation lock overlay */
         #rotation-lock {
             display: none;
             position: fixed;
@@ -79,7 +79,7 @@
             align-items: center;
         }
 
-        /* Music credit popup */
+        /* Music credit popup – hidden by default, animation only applied when .show-credit class added */
         #music-credit {
             position: fixed;
             top: 15px;
@@ -93,8 +93,12 @@
             letter-spacing: 0.5px;
             z-index: 3000;
             pointer-events: none;
-            animation: slideInOut 6s ease-in-out forwards;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            opacity: 0; /* hidden until animation */
+        }
+
+        #music-credit.show-credit {
+            animation: slideInOut 6s ease-in-out forwards;
         }
 
         @keyframes slideInOut {
@@ -295,7 +299,7 @@
             z-index: 1;
         }
 
-        /* ---------- MOBILE: Only applied when body has .is-mobile class ---------- */
+        /* Mobile styles */
         body.is-mobile #gallery-menu {
             width: 100%;
             height: 100%;
@@ -311,7 +315,7 @@
             grid-template-columns: repeat(3, 1fr);
             row-gap: 150px;
             column-gap: 8px;
-            padding: 8px 8px 80px 8px;   /* increased bottom padding to prevent cut-off */
+            padding: 8px 8px 80px 8px;
         }
 
         body.is-mobile .grid-item {
@@ -372,13 +376,12 @@
             padding: 5px 12px;
         }
 
-        /* Extra small mobile landscape */
         @media (max-width: 700px) {
             body.is-mobile .grid-container {
                 grid-template-columns: repeat(2, 1fr);
                 row-gap: 150px;
                 column-gap: 6px;
-                padding: 6px 6px 60px 6px;   /* slightly smaller but still enough */
+                padding: 6px 6px 60px 6px;
             }
 
             body.is-mobile .thumb {
@@ -425,17 +428,15 @@
 </head>
 <body>
 
-    <!-- Rotation Lock Overlay -->
     <div id="rotation-lock">
         <div class="rotate-icon">📱</div>
         <h2>Please Rotate Your Phone</h2>
         <p>This site is best viewed in landscape mode. Turn your phone sideways to continue.</p>
     </div>
 
-    <!-- Music credit popup with music note symbol -->
+    <!-- Music credit popup – initially hidden, shown when music starts -->
     <div id="music-credit">♪ Music by MakenCat</div>
 
-    <!-- Hidden audio element with the correct file name -->
     <audio id="bg-music" loop preload="auto">
         <source src="BackgroundMusic.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
@@ -488,7 +489,7 @@
             document.body.classList.add('is-mobile');
         }
 
-        // ---------- ROTATION LOCK LOGIC ----------
+        // ---------- ROTATION LOCK ----------
         const rotationLock = document.getElementById('rotation-lock');
         
         function checkOrientation() {
@@ -512,75 +513,109 @@
             setTimeout(checkOrientation, 100);
         });
 
-        // ---------- Background Music with Media Session API ----------
+        // ---------- MUSIC & MEDIA SESSION ----------
         const bgMusic = document.getElementById('bg-music');
-        
-        if ('mediaSession' in navigator) {
-            const GITHUB_USERNAME = "QuestionBlock64";
-            const REPO_NAME = "The-Bee-Folder";
-            const FOLDER_NAME = "The Bee Folder";
+        const musicCredit = document.getElementById('music-credit');
+
+        function showMusicCredit() {
+            // Only show if not already visible (animation may be running)
+            if (!musicCredit.classList.contains('show-credit')) {
+                musicCredit.classList.add('show-credit');
+                // Remove the class after animation ends so it can be re-triggered if needed
+                setTimeout(() => {
+                    musicCredit.classList.remove('show-credit');
+                }, 6000); // matches animation duration
+            }
+        }
+
+        async function updateMediaSessionArtwork() {
+            if (!('mediaSession' in navigator)) return;
             
-            async function setupMediaSession() {
-                try {
-                    const encodedFolder = encodeURIComponent(FOLDER_NAME);
-                    const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${encodedFolder}`;
-                    const response = await fetch(apiUrl);
-                    const files = await response.json();
-                    
-                    const everyoneFile = files.find(file => file.name === 'Everyone.png');
-                    if (everyoneFile && everyoneFile.download_url) {
-                        navigator.mediaSession.metadata = new MediaMetadata({
-                            title: 'Background Music',
-                            artist: 'MakenCat',
-                            album: 'The Bee Folder',
-                            artwork: [
-                                { src: everyoneFile.download_url, sizes: '512x512', type: 'image/png' }
-                            ]
-                        });
-                    }
-                } catch (error) {
-                    console.log('Could not set custom media session artwork:', error);
+            try {
+                const encodedFolder = encodeURIComponent("The Bee Folder");
+                const apiUrl = `https://api.github.com/repos/QuestionBlock64/The-Bee-Folder/contents/${encodedFolder}`;
+                const response = await fetch(apiUrl);
+                const files = await response.json();
+                
+                const everyoneFile = files.find(file => file.name === 'Everyone.png');
+                if (everyoneFile && everyoneFile.download_url) {
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: 'Background Music',
                         artist: 'MakenCat',
-                        album: 'The Bee Folder'
+                        album: 'The Bee Folder',
+                        artwork: [
+                            { src: everyoneFile.download_url, sizes: '1024x1024', type: 'image/png' },
+                            { src: everyoneFile.download_url, sizes: '512x512', type: 'image/png' },
+                            { src: everyoneFile.download_url, sizes: '256x256', type: 'image/png' },
+                            { src: everyoneFile.download_url, sizes: '128x128', type: 'image/png' },
+                        ]
                     });
                 }
-                
-                navigator.mediaSession.setActionHandler('play', () => {
-                    bgMusic.play();
+            } catch (error) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: 'Background Music',
+                    artist: 'MakenCat',
+                    album: 'The Bee Folder',
+                    artwork: [
+                        { src: 'folder.png', sizes: '512x512', type: 'image/png' }
+                    ]
                 });
-                navigator.mediaSession.setActionHandler('pause', () => {
-                    bgMusic.pause();
-                });
-                navigator.mediaSession.setActionHandler('previoustrack', null);
-                navigator.mediaSession.setActionHandler('nexttrack', null);
             }
             
-            bgMusic.addEventListener('play', () => {
+            navigator.mediaSession.playbackState = bgMusic.paused ? 'paused' : 'playing';
+            navigator.mediaSession.setActionHandler('play', () => {
+                bgMusic.play();
                 navigator.mediaSession.playbackState = 'playing';
             });
-            bgMusic.addEventListener('pause', () => {
+            navigator.mediaSession.setActionHandler('pause', () => {
+                bgMusic.pause();
                 navigator.mediaSession.playbackState = 'paused';
             });
-            
-            setupMediaSession();
+            navigator.mediaSession.setActionHandler('previoustrack', null);
+            navigator.mediaSession.setActionHandler('nexttrack', null);
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const playPromise = bgMusic.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(() => {});
+        // Attempt autoplay
+        async function attemptAutoplay() {
+            try {
+                await bgMusic.play();
+                // Autoplay succeeded
+                showMusicCredit();
+                updateMediaSessionArtwork();
+            } catch (err) {
+                // Autoplay blocked – wait for user interaction
+                console.log('Autoplay prevented, waiting for user interaction.');
+            }
+        }
+
+        // User interaction handler
+        function handleUserInteraction() {
+            if (bgMusic.paused) {
+                bgMusic.play().then(() => {
+                    showMusicCredit();
+                    updateMediaSessionArtwork();
+                }).catch(() => {});
+            }
+        }
+
+        document.addEventListener('click', handleUserInteraction, { once: true });
+        document.addEventListener('touchstart', handleUserInteraction, { once: true });
+
+        window.addEventListener('DOMContentLoaded', attemptAutoplay);
+
+        // Update media session playback state on play/pause
+        bgMusic.addEventListener('play', () => {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'playing';
+            }
+        });
+        bgMusic.addEventListener('pause', () => {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = 'paused';
             }
         });
 
-        document.addEventListener('click', () => {
-            if (bgMusic.paused) {
-                bgMusic.play().catch(() => {});
-            }
-        }, { once: true });
-
-        // ---------- Gallery Logic ----------
+        // ---------- GALLERY LOGIC ----------
         let imageFiles = [];
         let currentIndex = 0;
 
@@ -840,7 +875,6 @@
             }, 400);
         }
 
-        // ---------- Keyboard shortcut for Escape ----------
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 if (isFullscreen) {
