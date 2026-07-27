@@ -3,910 +3,772 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Bee Folder</title>
-    <link rel="icon" type="image/png" href="folder.png">
+    <title>QuestionBlock64 — Game Dev & Modder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Fredoka+One&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #fcecf4;
-            --header-pink: #ffb6c1;
-            --accent-pink: #ff69b4;
-            --text-dark: #4a4a4a;
-            --dark-purple: #4a235a;
+            --bg-primary: #06060d;
+            --bg-secondary: #0d0d1a;
+            --bg-card: rgba(19, 19, 36, 0.85);
+            --bg-card-hover: rgba(26, 26, 53, 0.9);
+            --text-primary: #e8e8f0;
+            --text-secondary: #a0a0b8;
+            --text-muted: #6b6b80;
+            --accent: #f0c040;
+            --accent-glow: rgba(240, 192, 64, 0.3);
+            --accent2: #ff6b4a;
+            --accent2-glow: rgba(255, 107, 74, 0.25);
+            --border: rgba(30, 30, 53, 0.7);
+            --border-light: rgba(42, 42, 69, 0.7);
+            --nav-bg: rgba(10, 10, 22, 0.7);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --max-width: 1100px;
+            --nav-height: 64px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --gradient-hero: linear-gradient(135deg, #ffae00, #ff0800);
+            --gradient-nav-name: linear-gradient(135deg, #e79282, #bf5c58);
+            --picture-glow: rgba(231, 146, 130, 0.4);
+            --picture-glow-strong: rgba(231, 146, 130, 0.7);
         }
 
-        /* Rotation lock overlay */
-        #rotation-lock {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: var(--dark-purple);
-            z-index: 9999;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 30px;
-            box-sizing: border-box;
-        }
-
-        #rotation-lock.active {
-            display: flex;
-        }
-
-        #rotation-lock .rotate-icon {
-            font-size: 60px;
-            animation: rotatePhone 2s ease-in-out infinite;
-            margin-bottom: 25px;
-            display: inline-block;
-        }
-
-        @keyframes rotatePhone {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(90deg); }
-            75% { transform: rotate(90deg); }
-        }
-
-        #rotation-lock h2 {
-            color: var(--header-pink);
-            font-size: 22px;
-            margin: 0 0 10px 0;
-            font-weight: 600;
-        }
-
-        #rotation-lock p {
-            color: #ccc;
-            font-size: 15px;
-            margin: 0;
-            line-height: 1.5;
-            max-width: 280px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; scroll-padding-top: var(--nav-height); }
 
         body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('Background.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            /* iOS fix: ensure the background covers the whole viewport */
-            background-attachment: scroll;
-            -webkit-background-size: cover;
-            color: var(--text-dark);
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: var(--font-sans);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
-        /* Music credit popup – hidden by default */
-        #music-credit {
+        .video-background {
             position: fixed;
-            top: 15px;
-            left: -350px;
-            background: rgba(0, 0, 0, 0.75);
-            color: #fff;
-            padding: 10px 25px;
-            border-radius: 0 8px 8px 0;
-            font-size: 16px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            z-index: 3000;
-            pointer-events: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            opacity: 0;
-        }
-
-        #music-credit.show-credit {
-            animation: slideInOut 6s ease-in-out forwards;
-        }
-
-        @keyframes slideInOut {
-            0%   { left: -350px; opacity: 0; }
-            8%   { left: 0; opacity: 1; }
-            92%  { left: 0; opacity: 1; }
-            100% { left: -350px; opacity: 0; }
-        }
-
-        #gallery-menu {
-            background-color: var(--bg-color);
-            width: 80%;
-            height: 80%;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .menu-header {
-            padding: 15px 20px;
-            font-weight: bold;
-            color: var(--dark-purple);
-            border-bottom: 2px solid var(--header-pink);
-            display: flex;
-            justify-content: space-between;
-            flex-shrink: 0;
-        }
-
-        .grid-container {
-            padding: 30px 30px 150px 30px;
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            row-gap: 150px;
-            column-gap: 35px;
-            overflow-y: auto;
-            flex-grow: 1;
-            min-height: 0; 
-            align-content: start; 
-        }
-
-        .grid-item {
-            background-color: #e0e0e0;
-            border-radius: 5px;
-            cursor: pointer;
-            aspect-ratio: 16/9;
-            width: 100%;
-            overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
-        }
-
-        .grid-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
-        }
-
-        .grid-item img {
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover;
-            display: block;
+            z-index: -3;
+            pointer-events: none;
         }
-
-        #image-viewer {
-            display: none;
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: url('BeeDoodleBackground.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            /* iOS background fix */
-            background-attachment: scroll;
-            -webkit-background-size: cover;
-            flex-direction: column;
-            z-index: 100;
-        }
-
-        .main-image-container {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            background-color: transparent;
-            padding: 20px;
-        }
-
-        .main-image-container img {
-            max-width: 90%;
-            max-height: 70vh;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-            object-fit: contain;
-            transition: opacity 0.3s ease;
-            cursor: pointer;
-        }
-
-        .info-bar {
-            background-color: rgba(0, 0, 0, 0.8);
-            color: #aaa;
-            text-align: center;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-
-        .carousel-container {
-            height: 150px;
-            background-color: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 20px;
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .carousel-track {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            max-width: 70%;
-            padding: 10px;
-            scrollbar-width: none;
-        }
-        .carousel-track::-webkit-scrollbar { display: none; }
-
-        .thumb {
-            width: 160px;
-            height: 90px;
-            flex-shrink: 0;
-            background-color: #333;
-            cursor: pointer;
-            opacity: 0.6;
-            transition: opacity 0.2s, transform 0.2s;
-            border: 2px solid transparent;
-        }
-
-        .thumb:hover, .thumb.active { opacity: 1; }
-        .thumb.active { border-color: var(--accent-pink); transform: scale(1.05); }
-        .thumb img { width: 100%; height: 100%; object-fit: cover; }
-
-        .arrow {
-            font-size: 40px;
-            color: var(--accent-pink);
-            cursor: pointer;
-            user-select: none;
-            padding: 0 20px;
-        }
-        .arrow:hover { color: #ff99cc; }
-
-        .viewer-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 40px;
-            display: flex;
-            gap: 20px;
-            color: white;
-            font-size: 18px;
-        }
-
-        .btn-control { cursor: pointer; transition: color 0.2s; }
-        .btn-control:hover { color: var(--header-pink); }
-
-        #fullscreen-overlay {
-            display: none;
+        .video-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-image: url('BeeDoodleBackground.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            /* iOS background fix */
-            background-attachment: scroll;
-            -webkit-background-size: cover;
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: -2;
+            pointer-events: none;
         }
 
-        #fullscreen-overlay::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 0;
-        }
-
-        #fullscreen-overlay img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            box-shadow: 0 0 30px rgba(0,0,0,0.9);
-            cursor: pointer;
+        .main-blur-wrapper {
             position: relative;
             z-index: 1;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(6, 6, 13, 0.35);
+            min-height: 100vh;
+            padding-top: var(--nav-height);
         }
 
-        /* Mobile styles */
-        body.is-mobile #gallery-menu {
-            width: 100%;
-            height: 100%;
-            border-radius: 0;
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            height: var(--nav-height); background: var(--nav-bg);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border); transition: var(--transition);
+        }
+        .nav.scrolled { box-shadow: 0 4px 30px rgba(0,0,0,0.5); }
+        .nav-inner {
+            max-width: var(--max-width); margin: 0 auto; padding: 0 24px;
+            height: 100%; display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px; text-decoration: none;
+            font-weight: 700; font-size: 1.15rem;
+            letter-spacing: -0.02em; transition: var(--transition);
+            background: var(--gradient-nav-name);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        .nav-logo:hover {
+            filter: drop-shadow(0 0 12px var(--picture-glow-strong));
+        }
+        .nav-icon-img {
+            width: 38px; height: 38px; border-radius: 10px;
+            object-fit: cover;
+            box-shadow: 0 4px 15px var(--picture-glow);
+            transition: var(--transition);
+        }
+        .nav-logo:hover .nav-icon-img {
+            transform: scale(1.08) rotate(-5deg);
+            box-shadow: 0 6px 25px var(--picture-glow-strong);
+        }
+        .nav-links { display: flex; gap: 6px; list-style: none; align-items: center; }
+        .nav-links a {
+            text-decoration: none; color: var(--text-secondary); font-weight: 500;
+            font-size: 0.92rem; padding: 8px 16px; border-radius: 8px;
+            transition: var(--transition); letter-spacing: -0.01em;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-primary); background: rgba(255,255,255,0.04);
+            transform: scale(1.08);
+        }
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 8px; z-index: 1001; }
+        .hamburger span { width: 24px; height: 2px; background: var(--text-primary); border-radius: 2px; transition: var(--transition); }
+        .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+        .hamburger.active span:nth-child(2) { opacity: 0; }
+        .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+
+        .section { max-width: var(--max-width); margin: 0 auto; padding: 100px 24px; }
+        .section-label {
+            font-family: 'Fredoka One', cursive;
+            font-size: 0.85rem;
+            font-weight: 400;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            /* base color overridden per section */
+            color: var(--accent); /* fallback */
+        }
+        .section-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.4rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        .section-subtitle { color: var(--text-secondary); font-size: 1.05rem; max-width: 560px; margin-bottom: 40px; }
+
+        .hero-section { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
+        .hero-inner { text-align: center; max-width: 800px; padding: 40px 24px; }
+        .hero-avatar {
+            width: 100px; height: 100px; border-radius: 28px;
+            background: linear-gradient(135deg, #1e1e3a, #252545);
+            border: 2px solid var(--border-light);
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 28px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            position: relative;
+            animation: float 5s ease-in-out infinite;
+            overflow: hidden;
+        }
+        .hero-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        .hero-avatar::after {
+            content: ''; position: absolute; inset: -6px; border-radius: 32px;
+            border: 2px solid transparent;
+            background: var(--gradient-hero) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .hero-title {
+            font-size: clamp(1.6rem, 4vw, 3.5rem);
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            white-space: nowrap;
+            font-family: var(--font-sans);
+        }
+        .hero-title .accent {
+            font-family: 'Cherry Bomb One', cursive;
+            background: var(--gradient-hero);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            display: inline;
+            position: relative;
+            letter-spacing: 0.02em;
+        }
+        .hero-title .accent::after {
+            content: ''; position: absolute; bottom: 4px; left: 0; right: 0; height: 6px;
+            background: var(--gradient-hero);
+            border-radius: 3px; z-index: -1; opacity: 0.4;
+        }
+        .hero-tagline { font-size: 1.15rem; color: var(--text-secondary); margin-bottom: 32px; line-height: 1.5; }
+        .hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px;
+            border-radius: 10px; font-weight: 600; font-size: 0.95rem; text-decoration: none;
+            transition: var(--transition); cursor: pointer; border: none; font-family: var(--font-sans);
+        }
+        .btn-primary { background: var(--accent); color: #1a1a00; box-shadow: 0 4px 20px var(--accent-glow); }
+        .btn-primary:hover {
+            background: #f5cc5a;
+            box-shadow: 0 8px 30px rgba(240,192,64,0.5);
+            transform: scale(1.15) translateY(-3px);
+        }
+        .btn-outline { background: transparent; color: var(--text-primary); border: 1.5px solid var(--border-light); }
+        .btn-outline:hover {
+            border-color: var(--accent);
+            background: rgba(240,192,64,0.05);
+            transform: scale(1.15) translateY(-3px);
         }
 
-        body.is-mobile .menu-header {
-            padding: 6px 10px;
-            font-size: 13px;
+        /* About */
+        .about-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
+        .about-text p { color: var(--text-secondary); margin-bottom: 16px; font-size: 1rem; line-height: 1.7; }
+
+        /* Projects */
+        .projects-grid { display: flex; flex-wrap: nowrap; gap: 20px; }
+        .project-card {
+            flex: 1; min-width: 0;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 28px; transition: var(--transition);
+            text-decoration: none; color: inherit; display: block;
+            position: relative; overflow: hidden; backdrop-filter: blur(5px);
+        }
+        .project-card:hover {
+            border-color: var(--border-light); background: var(--bg-card-hover);
+            transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+        }
+        .project-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            opacity: 0; transition: var(--transition); border-radius: 0 0 3px 3px;
+        }
+        .project-card:hover::before { opacity: 1; }
+        .project-icon { width: 48px; height: 48px; margin-bottom: 16px; display: block; object-fit: contain; }
+        .project-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
+        .project-card p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px; }
+        .project-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .project-tag {
+            background: rgba(255,255,255,0.04); padding: 4px 10px; border-radius: 14px;
+            font-size: 0.75rem; font-weight: 500; color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+        .project-card.wip { opacity: 0.75; border-style: dashed; }
+        .project-card.unavailable { cursor: default; }
+        .project-card.unavailable:hover { cursor: not-allowed; }
+        .project-card.unavailable::after {
+            content: "Currently Unavailable";
+            position: absolute; inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; font-weight: 700; color: #ffffff;
+            opacity: 0; transition: opacity 0.3s ease;
+            pointer-events: none; z-index: 2;
+            letter-spacing: 0.02em; text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+        .project-card.unavailable:hover::after { opacity: 1; }
+
+        .project-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .project-link-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+            border-radius: 20px; background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border-light); color: var(--text-secondary);
+            text-decoration: none; font-size: 0.8rem; font-weight: 500;
+            transition: var(--transition); font-family: var(--font-sans);
+        }
+        .project-link-btn:hover {
+            background: rgba(240,192,64,0.1); border-color: var(--accent);
+            color: var(--accent); transform: translateY(-1px);
+        }
+        .project-link-btn img { width: 16px; height: 16px; object-fit: contain; }
+
+        /* Animated gold link for Lychibe */
+        .lychibe-link {
+            font-family: 'Cherry Bomb One', cursive;
+            background: linear-gradient(90deg, #ffd700, #ffaa00, #ffd700);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            animation: moveGradient 2s linear infinite;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .lychibe-link:hover {
+            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.7));
         }
 
-        body.is-mobile .grid-container {
-            grid-template-columns: repeat(3, 1fr);
-            row-gap: 150px;
-            column-gap: 8px;
-            padding: 8px 8px 80px 8px;
+        @keyframes moveGradient {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
         }
 
-        body.is-mobile .grid-item {
-            border-radius: 3px;
-            aspect-ratio: 16/9;
+        /* Skills */
+        .skills-categories { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+        .skill-category {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 24px; backdrop-filter: blur(5px);
+        }
+        .skill-category h4 { font-weight: 700; margin-bottom: 16px; font-size: 1rem; }
+        .skill-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+        .skill-pill {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            padding: 6px 14px; border-radius: 18px; font-size: 0.82rem;
+            font-weight: 500; color: var(--text-secondary); transition: var(--transition);
+            font-family: var(--font-mono);
+        }
+        .skill-pill:hover { border-color: var(--accent); color: var(--accent); background: rgba(240,192,64,0.06); }
+
+        /* Socials */
+        .socials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+        }
+        .social-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 24px; transition: var(--transition);
+            backdrop-filter: blur(5px); text-decoration: none; color: inherit;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            position: relative;
+        }
+        .social-card:hover {
+            border-color: var(--border-light); background: var(--bg-card-hover);
+            transform: translateY(-4px);
+        }
+        .social-card img {
+            width: 48px; height: 48px;
+            object-fit: contain;
+            margin-bottom: 12px;
+        }
+        .social-card h4 { font-weight: 600; font-size: 1rem; margin-bottom: 4px; }
+        .social-card span { font-size: 0.8rem; color: var(--text-muted); }
+
+        .social-card.placeholder {
+            opacity: 0.65;
+            cursor: default;
+            filter: grayscale(0.4);
+        }
+        .social-card.placeholder:hover {
+            opacity: 0.85;
+            filter: grayscale(0);
         }
 
-        body.is-mobile .grid-item:hover {
-            transform: scale(1.02);
+        .footer {
+            border-top: 1px solid var(--border); padding: 32px 24px; text-align: center;
+            color: var(--text-muted); font-size: 0.85rem;
+            background: rgba(6,6,13,0.8); backdrop-filter: blur(10px);
+            position: relative; z-index: 1;
+        }
+        .footer a { color: var(--accent); text-decoration: none; transition: var(--transition); }
+        .footer a:hover { color: #f5cc5a; }
+        .footer-links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px; }
+
+        .fade-in {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* Spreading gradient for section labels */
+        #about .section-label {
+            color: #ffae00;
+            -webkit-text-fill-color: #ffae00;
+        }
+        #projects .section-label {
+            color: #ff6b00;
+            -webkit-text-fill-color: #ff6b00;
+        }
+        #skills .section-label {
+            color: #ff2b00;
+            -webkit-text-fill-color: #ff2b00;
+        }
+        #socials .section-label {
+            color: #ff0800;
+            -webkit-text-fill-color: #ff0800;
         }
 
-        body.is-mobile #image-viewer .main-image-container {
-            padding: 5px;
-        }
-
-        body.is-mobile .main-image-container img {
-            max-height: 50vh;
-            max-width: 85%;
-        }
-
-        body.is-mobile .info-bar {
-            padding: 5px;
-            font-size: 10px;
-        }
-
-        body.is-mobile .carousel-container {
-            height: 70px;
-            padding: 0 5px;
-        }
-
-        body.is-mobile .carousel-track {
-            max-width: 82%;
-            gap: 5px;
-            padding: 4px;
-        }
-
-        body.is-mobile .thumb {
-            width: 75px;
-            height: 42px;
-            border-width: 1px;
-        }
-
-        body.is-mobile .arrow {
-            font-size: 22px;
-            padding: 0 5px;
-        }
-
-        body.is-mobile .viewer-controls {
-            bottom: 6px;
-            right: 10px;
-            font-size: 12px;
-            gap: 6px;
-        }
-
-        body.is-mobile #music-credit {
-            top: 5px;
-            font-size: 11px;
-            padding: 5px 12px;
-        }
-
-        @media (max-width: 700px) {
-            body.is-mobile .grid-container {
-                grid-template-columns: repeat(2, 1fr);
-                row-gap: 150px;
-                column-gap: 6px;
-                padding: 6px 6px 60px 6px;
+        @media (max-width: 768px) {
+            .section { padding: 70px 18px; }
+            .section-title { font-size: 1.8rem; }
+            .skills-categories { grid-template-columns: 1fr; }
+            .socials-grid { grid-template-columns: repeat(3, 1fr); }
+            .nav-links {
+                position: fixed; top: 0; right: -100%; width: 260px; height: 100vh;
+                flex-direction: column; background: var(--bg-secondary);
+                border-left: 1px solid var(--border); padding: 100px 24px 40px;
+                gap: 4px; transition: var(--transition);
+                box-shadow: -10px 0 40px rgba(0,0,0,0.6);
             }
-
-            body.is-mobile .thumb {
-                width: 55px;
-                height: 32px;
-            }
-
-            body.is-mobile .carousel-container {
-                height: 55px;
-            }
-
-            body.is-mobile .arrow {
-                font-size: 18px;
-                padding: 0 3px;
-            }
-
-            body.is-mobile .carousel-track {
-                max-width: 85%;
-                gap: 3px;
-            }
-
-            body.is-mobile .main-image-container img {
-                max-height: 40vh;
-            }
-
-            body.is-mobile .menu-header {
-                padding: 4px 8px;
-                font-size: 11px;
-            }
-
-            body.is-mobile .info-bar {
-                padding: 3px;
-                font-size: 9px;
-            }
-
-            body.is-mobile .viewer-controls {
-                bottom: 4px;
-                right: 6px;
-                font-size: 10px;
-                gap: 4px;
-            }
+            .nav-links.open { right: 0; }
+            .nav-links a { padding: 12px 16px; width: 100%; border-radius: 8px; }
+            .hamburger { display: flex; }
+            .hero-title { font-size: clamp(1.3rem, 5vw, 2.5rem); white-space: nowrap; }
+            .hero-avatar { width: 80px; height: 80px; border-radius: 22px; }
+            .nav-icon-img { width: 32px; height: 32px; border-radius: 8px; }
+            .project-icon { width: 40px; height: 40px; }
+            .projects-grid { flex-wrap: wrap; }
+            .project-card { flex: 1 1 45%; min-width: 250px; }
+        }
+        @media (max-width: 420px) {
+            .socials-grid { grid-template-columns: 1fr 1fr; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+            .btn { width: 100%; justify-content: center; }
+            .project-card { flex: 1 1 100%; }
         }
     </style>
 </head>
 <body>
+    <!-- Video Background -->
+    <video class="video-background" autoplay muted loop playsinline>
+        <source src="resources/bg.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <div class="video-overlay"></div>
 
-    <div id="rotation-lock">
-        <div class="rotate-icon">📱</div>
-        <h2>Please Rotate Your Phone</h2>
-        <p>This site is best viewed in landscape mode. Turn your phone sideways to continue.</p>
-    </div>
-
-    <div id="music-credit">♪ Music by MakenCat</div>
-
-    <audio id="bg-music" loop preload="auto">
-        <source src="BackgroundMusic.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-
-    <div id="gallery-menu">
-        <div class="menu-header">
-            <span>Pictures</span>
-            <span style="cursor: default;">&times;</span>
+    <!-- Navigation -->
+    <nav class="nav" id="navbar">
+        <div class="nav-inner">
+            <a href="#hero" class="nav-logo">
+                <img src="resources/yui.jpg" alt="QuestionBlock64 logo" class="nav-icon-img">
+                QuestionBlock64
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#about" data-nav>About</a></li>
+                <li><a href="#projects" data-nav>Projects</a></li>
+                <li><a href="#skills" data-nav>Skills</a></li>
+                <li><a href="#socials" data-nav>Socials</a></li>
+            </ul>
+            <button class="hamburger" id="hamburger" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
         </div>
-        <div class="grid-container" id="grid-container">
-        </div>
-    </div>
+    </nav>
 
-    <div id="image-viewer">
-        <div class="main-image-container">
-            <img id="main-display-img" src="" alt="Selected Image" style="opacity: 0;">
-        </div>
-        <div class="info-bar" id="info-bar">
-            Loading images from GitHub...
-        </div>
-        
-        <div class="carousel-container">
-            <div class="arrow" onclick="changeImage(-1)">&#9664;</div>
-            <div class="carousel-track" id="carousel-track">
+    <div class="main-blur-wrapper">
+        <section class="hero-section section" id="hero">
+            <div class="hero-inner">
+                <div class="hero-avatar">
+                    <img src="resources/qb.jpg" alt="QuestionBlock64 profile picture">
+                </div>
+                <h1 class="hero-title">
+                    Hey, I'm <span class="accent">QuestionBlock64</span>
+                </h1>
+                <p class="hero-tagline" id="typingText">
+                    Game Developer · Modder · Reverse Engineer<span class="cursor">|</span>
+                </p>
+                <div class="hero-buttons">
+                    <a href="#projects" class="btn btn-primary">Projects</a>
+                    <a href="#about" class="btn btn-outline">More About Me</a>
+                </div>
             </div>
-            <div class="arrow" onclick="changeImage(1)">&#9654;</div>
-            
-            <div class="viewer-controls">
-                <div class="btn-control" onclick="closeViewer()">Back</div>
+        </section>
+
+        <section class="section" id="about">
+            <p class="section-label fade-in">／ About Me ＼</p>
+            <h2 class="section-title fade-in">The dev behind the block</h2>
+            <p class="section-subtitle fade-in">
+                Indie game developer and software modder with a passion for reverse engineering and game physics.
+            </p>
+            <div class="about-grid">
+                <div class="about-text fade-in">
+                    <p>
+                        I spend a lot of time analyzing momentum and character movement kits from classic franchises like
+                        <strong>Super Mario</strong> and <strong>Sonic the Hedgehog</strong>. That deep dive into game feel
+                        directly inspires my own projects.
+                    </p>
+                    <p>
+                        Currently, I'm engineering a <strong>custom standalone 2D platformer</strong> in the Godot engine — a personal
+                        project dedicated to a close friend who stars as the protagonist. On the modding front, I'm leading
+                        development of the <strong>MiSide Multiplayer Mod</strong>, pioneering multiplayer network synchronization
+                        and animation handling with the BepInEx framework.
+                    </p>
+                    <p>
+                        Beyond code, I'm often lost in complex video game lore or experimenting with Windows OS architecture
+                        and kernel-level behaviors. Every day is a new puzzle to solve.
+                    </p>
+                </div>
             </div>
-        </div>
+        </section>
+
+        <section class="section" id="projects">
+            <p class="section-label fade-in">／ Projects ＼</p>
+            <h2 class="section-title fade-in">What I'm building</h2>
+            <p class="section-subtitle fade-in">
+                From multiplayer mods to platformer engines — here's the current lineup.
+            </p>
+            <div class="projects-grid">
+                <!-- Bee Folder (whole card clickable, Lychibe link separate) -->
+                <a href="https://questionblock64.github.io/TheBeeFolder" class="project-card fade-in" target="_blank" rel="noopener">
+                    <img src="resources/thebeeicon.png" alt="The Bee Folder icon" class="project-icon">
+                    <h3>The Bee Folder</h3>
+                    <p>A little github website made to host The Bee Folder that is on my drive. It is primarily made for my kamioshi <span class="lychibe-link" onclick="event.stopPropagation(); event.preventDefault(); window.open('https://virtualyoutuber.fandom.com/wiki/Lychibe','_blank');">Lychibe</span>.</p>
+                    <div class="project-tags">
+                        <span class="project-tag">HTML/CSS</span>
+                        <span class="project-tag">Resources</span>
+                    </div>
+                </a>
+
+                <div class="project-card fade-in">
+                    <img src="resources/mita.ico" alt="MiSide Multiplayer icon" class="project-icon">
+                    <h3>MiSide Multiplayer Mod</h3>
+                    <p>Pioneering multiplayer network sync and animation handling for MiSide using BepInEx.</p>
+                    <div class="project-tags">
+                        <span class="project-tag">C#</span>
+                        <span class="project-tag">BepInEx</span>
+                        <span class="project-tag">IL2CPP</span>
+                        <span class="project-tag">Unity</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="https://github.com/QuestionBlock64/MiSide-Multiplayer" target="_blank" rel="noopener" class="project-link-btn">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                            GitHub
+                        </a>
+                        <a href="https://www.nexusmods.com/miside/mods/778" target="_blank" rel="noopener" class="project-link-btn">
+                            <img src="resources/nexus.ico" alt="NexusMods"> NexusMods
+                        </a>
+                    </div>
+                </div>
+
+                <div class="project-card unavailable fade-in">
+                    <img src="resources/brick.png" alt="Super BrickGame World icon" class="project-icon">
+                    <h3>Super BrickGame World</h3>
+                    <p>What started off as a Super Mario World rom hack is now it's own standalone game! (In developement)</p>
+                    <div class="project-tags">
+                        <span class="project-tag">Godot</span>
+                        <span class="project-tag">GDScript</span>
+                        <span class="project-tag">C++</span>
+                    </div>
+                </div>
+
+                <div class="project-card unavailable wip fade-in">
+                    <img src="resources/hn.ico" alt="Hello Neighbor: Shadow Within icon" class="project-icon">
+                    <h3>Hello Neighbor: Shadow Within</h3>
+                    <p>A peek into what is happening inside of Nicky Roth's mind during Hello Neigbor. Built on Unreal Engine to honor the original game. (In developement)</p>
+                    <div class="project-tags">
+                        <span class="project-tag">WIP</span>
+                        <span class="project-tag">Unreal Engine</span>
+                        <span class="project-tag">C++</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="skills">
+            <p class="section-label fade-in">／ Skills & Tech Stack ＼</p>
+            <h2 class="section-title fade-in">Tools of the trade</h2>
+            <p class="section-subtitle fade-in">Languages, engines, and platforms I work with regularly.</p>
+            <div class="skills-categories">
+                <div class="skill-category fade-in">
+                    <h4>Programming Languages</h4>
+                    <div class="skill-pills">
+                        <span class="skill-pill">C#</span>
+                        <span class="skill-pill">C++</span>
+                        <span class="skill-pill">Assembly</span>
+                        <span class="skill-pill">GDScript</span>
+                        <span class="skill-pill">HTML</span>
+                    </div>
+                </div>
+                <div class="skill-category fade-in">
+                    <h4>Game Engines & Frameworks</h4>
+                    <div class="skill-pills">
+                        <span class="skill-pill">Godot</span>
+                        <span class="skill-pill">Unreal Engine</span>
+                        <span class="skill-pill">Unity</span>
+                        <span class="skill-pill">.NET</span>
+                        <span class="skill-pill">BepInEx</span>
+                        <span class="skill-pill">IL2CPP</span>
+                    </div>
+                </div>
+                <div class="skill-category fade-in">
+                    <h4>OS, Tools & Platforms</h4>
+                    <div class="skill-pills">
+                        <span class="skill-pill">Windows</span>
+                        <span class="skill-pill">Win32</span>
+                        <span class="skill-pill">macOS</span>
+                        <span class="skill-pill">Linux</span>
+                        <span class="skill-pill">Nintendo Switch</span>
+                        <span class="skill-pill">Nintendo 3DS</span>
+                        <span class="skill-pill">Git</span>
+                        <span class="skill-pill">Node.js</span>
+                        <span class="skill-pill">discord.js</span>
+                        <span class="skill-pill">Discord Application</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="socials">
+            <p class="section-label fade-in">／ Socials ＼</p>
+            <h2 class="section-title fade-in">Find me online</h2>
+            <p class="section-subtitle fade-in">
+                Where you can catch me and what I'm working on.
+            </p>
+            <div class="socials-grid">
+                <!-- GitHub -->
+                <a href="https://github.com/QuestionBlock64" target="_blank" rel="noopener" class="social-card fade-in">
+                    <img src="resources/github.png" alt="GitHub">
+                    <h4>GitHub</h4>
+                    <span>QuestionBlock64</span>
+                </a>
+                <!-- Steam -->
+                <a href="https://steamcommunity.com/id/QuestionBlock64" target="_blank" rel="noopener" class="social-card fade-in">
+                    <img src="resources/steam.png" alt="Steam">
+                    <h4>Steam</h4>
+                    <span>QuestionBlock64</span>
+                </a>
+                <!-- YouTube -->
+                <a href="https://youtube.com/@QuestionBlock64" target="_blank" rel="noopener" class="social-card fade-in">
+                    <img src="resources/youtube.png" alt="YouTube">
+                    <h4>YouTube</h4>
+                    <span>@QuestionBlock64</span>
+                </a>
+                <!-- Discord (MiSide Multiplayer server) -->
+                <a href="https://discord.gg/yyDVE3rTzQ" target="_blank" rel="noopener" class="social-card fade-in">
+                    <img src="resources/discord.png" alt="Discord">
+                    <h4>Discord</h4>
+                    <span>MiSide Multiplayer</span>
+                </a>
+                <!-- Twitter / X -->
+                <a href="https://twitter.com/QuestionBlock64" target="_blank" rel="noopener" class="social-card fade-in">
+                    <img src="resources/twitter.png" alt="X / Twitter">
+                    <h4>X / Twitter</h4>
+                    <span>@QuestionBlock64</span>
+                </a>
+                <!-- Twitch -->
+                <a href="https://twitch.tv/QuestionBlock64" target="_blank" rel="noopener" class="social-card fade-in">
+                    <img src="resources/twitch.png" alt="Twitch">
+                    <h4>Twitch</h4>
+                    <span>QuestionBlock64</span>
+                </a>
+                <!-- Themezer -->
+                <a href="https://themezer.net/creators/QuestionBlock64" target="_blank" rel="noopener" class="social-card fade-in">
+                    <img src="resources/themezer.png" alt="Themezer">
+                    <h4>Themezer</h4>
+                    <span>QuestionBlock64</span>
+                </a>
+                <!-- NexusMods -->
+                <a href="https://www.nexusmods.com/profile/QuestionBlock64" target="_blank" rel="noopener" class="social-card fade-in">
+                    <img src="resources/nexus.ico" alt="NexusMods">
+                    <h4>NexusMods</h4>
+                    <span>QuestionBlock64</span>
+                </a>
+                <!-- Guns.lol -->
+                <a href="https://guns.lol/questionblock64" target="_blank" rel="noopener" class="social-card fade-in">
+                    <img src="resources/guns.png" alt="Guns.lol">
+                    <h4>Guns.lol</h4>
+                    <span>questionblock64</span>
+                </a>
+            </div>
+        </section>
     </div>
 
-    <div id="fullscreen-overlay">
-        <img id="fullscreen-img" src="" alt="Fullscreen Image">
-    </div>
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="https://github.com/QuestionBlock64" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://questionblock64.github.io/TheBeeFolder">TheBeeFolder</a>
+            <a href="#hero">Back to Top</a>
+        </div>
+        <p>© <span id="currentYear"></span> QuestionBlock64</p>
+    </footer>
 
     <script>
-        // ---------- MOBILE DETECTION ----------
-        function isMobileDevice() {
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            const mobileRegex = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i;
-            const hasTouchScreen = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-            const isSmallScreen = window.innerWidth <= 1024;
-            return mobileRegex.test(userAgent) || (hasTouchScreen && isSmallScreen);
-        }
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
 
-        if (isMobileDevice()) {
-            document.body.classList.add('is-mobile');
-        }
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 40);
+        });
 
-        // ---------- ROTATION LOCK ----------
-        const rotationLock = document.getElementById('rotation-lock');
-        
-        function checkOrientation() {
-            if (!document.body.classList.contains('is-mobile')) {
-                rotationLock.classList.remove('active');
-                return;
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('navLinks');
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('open');
+        });
+        document.querySelectorAll('[data-nav]').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('open');
+            });
+        });
+        document.addEventListener('click', (e) => {
+            if (!navbar.contains(e.target) && navLinks.classList.contains('open')) {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('open');
             }
-            
-            const isPortrait = window.innerHeight > window.innerWidth;
-            
-            if (isPortrait) {
-                rotationLock.classList.add('active');
+        });
+
+        const sections = document.querySelectorAll('section[id]');
+        const navItems = document.querySelectorAll('[data-nav]');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                if (window.scrollY >= section.offsetTop - 120) {
+                    current = section.getAttribute('id');
+                }
+            });
+            navItems.forEach(item => {
+                item.classList.toggle('active', item.getAttribute('href') === '#' + current);
+            });
+        });
+
+        const fadeEls = document.querySelectorAll('.fade-in');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+        fadeEls.forEach(el => observer.observe(el));
+
+        const typingText = document.getElementById('typingText');
+        const phrases = [
+            'Game Developer · Modder · Reverse Engineer, Gamer.',
+            'Building multiplayer mods with BepInEx.',
+            'Crafting a 2D platformer in Godot.',
+            'Pushing the limits of what a system can do.',
+            'Experimenting with Microsoft Windows.',
+            'Experimenting with HorizonOS and creating themes.'
+        ];
+        let phraseIndex = 0, charIndex = 0, isDeleting = false, typingSpeed = 60;
+        function typeLoop() {
+            const current = phrases[phraseIndex];
+            const cursorSpan = '<span class="cursor">|</span>';
+            if (!isDeleting) {
+                typingText.innerHTML = current.substring(0, charIndex) + cursorSpan;
+                charIndex++;
+                if (charIndex > current.length) {
+                    isDeleting = true;
+                    typingSpeed = 2000;
+                } else {
+                    typingSpeed = 50 + Math.random() * 40;
+                }
             } else {
-                rotationLock.classList.remove('active');
-            }
-        }
-        
-        checkOrientation();
-        window.addEventListener('resize', checkOrientation);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(checkOrientation, 100);
-        });
-
-        // ---------- MUSIC & MEDIA SESSION ----------
-        const bgMusic = document.getElementById('bg-music');
-        const musicCredit = document.getElementById('music-credit');
-
-        function showMusicCredit() {
-            if (!musicCredit.classList.contains('show-credit')) {
-                musicCredit.classList.add('show-credit');
-                setTimeout(() => {
-                    musicCredit.classList.remove('show-credit');
-                }, 6000);
-            }
-        }
-
-        async function updateMediaSessionArtwork() {
-            if (!('mediaSession' in navigator)) return;
-            
-            try {
-                const encodedFolder = encodeURIComponent("The Bee Folder");
-                const apiUrl = `https://api.github.com/repos/QuestionBlock64/The-Bee-Folder/contents/${encodedFolder}`;
-                const response = await fetch(apiUrl);
-                const files = await response.json();
-                
-                const everyoneFile = files.find(file => file.name === 'Everyone.png');
-                if (everyoneFile && everyoneFile.download_url) {
-                    navigator.mediaSession.metadata = new MediaMetadata({
-                        title: 'Background Music',
-                        artist: 'MakenCat',
-                        album: 'The Bee Folder',
-                        artwork: [
-                            { src: everyoneFile.download_url, sizes: '1024x1024', type: 'image/png' },
-                            { src: everyoneFile.download_url, sizes: '512x512', type: 'image/png' },
-                            { src: everyoneFile.download_url, sizes: '256x256', type: 'image/png' },
-                            { src: everyoneFile.download_url, sizes: '128x128', type: 'image/png' },
-                        ]
-                    });
-                }
-            } catch (error) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: 'Background Music',
-                    artist: 'MakenCat',
-                    album: 'The Bee Folder',
-                    artwork: [
-                        { src: 'folder.png', sizes: '512x512', type: 'image/png' }
-                    ]
-                });
-            }
-            
-            navigator.mediaSession.playbackState = bgMusic.paused ? 'paused' : 'playing';
-            navigator.mediaSession.setActionHandler('play', () => {
-                bgMusic.play();
-                navigator.mediaSession.playbackState = 'playing';
-            });
-            navigator.mediaSession.setActionHandler('pause', () => {
-                bgMusic.pause();
-                navigator.mediaSession.playbackState = 'paused';
-            });
-            navigator.mediaSession.setActionHandler('previoustrack', null);
-            navigator.mediaSession.setActionHandler('nexttrack', null);
-        }
-
-        async function attemptAutoplay() {
-            try {
-                await bgMusic.play();
-                showMusicCredit();
-                updateMediaSessionArtwork();
-            } catch (err) {
-                console.log('Autoplay prevented, waiting for user interaction.');
-            }
-        }
-
-        function handleUserInteraction() {
-            if (bgMusic.paused) {
-                bgMusic.play().then(() => {
-                    showMusicCredit();
-                    updateMediaSessionArtwork();
-                }).catch(() => {});
-            }
-        }
-
-        document.addEventListener('click', handleUserInteraction, { once: true });
-        document.addEventListener('touchstart', handleUserInteraction, { once: true });
-
-        window.addEventListener('DOMContentLoaded', attemptAutoplay);
-
-        bgMusic.addEventListener('play', () => {
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = 'playing';
-            }
-        });
-        bgMusic.addEventListener('pause', () => {
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = 'paused';
-            }
-        });
-
-        // ---------- GALLERY LOGIC ----------
-        let imageFiles = [];
-        let currentIndex = 0;
-
-        const gridContainer = document.getElementById('grid-container');
-        const galleryMenu = document.getElementById('gallery-menu');
-        const imageViewer = document.getElementById('image-viewer');
-        const mainDisplayImg = document.getElementById('main-display-img');
-        const carouselTrack = document.getElementById('carousel-track');
-        const infoBar = document.getElementById('info-bar');
-        const fullscreenOverlay = document.getElementById('fullscreen-overlay');
-        const fullscreenImg = document.getElementById('fullscreen-img');
-
-        let isFullscreen = false;
-
-        async function fetchImagesFromGitHub() {
-            const encodedFolder = encodeURIComponent("The Bee Folder");
-            const apiUrl = `https://api.github.com/repos/QuestionBlock64/The-Bee-Folder/contents/${encodedFolder}`;
-
-            try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error("Could not read repo.");
-                const files = await response.json();
-                const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
-                imageFiles = files
-                    .filter(file => file.type === 'file' && validExtensions.some(ext => file.name.toLowerCase().endsWith(ext)))
-                    .map(file => ({ name: file.name, url: file.download_url }));
-
-                if (imageFiles.length === 0) return;
-                infoBar.innerText = `[ACQUISITION PROCEDURE] Loaded ${imageFiles.length} images.`;
-                buildGallery();
-            } catch (error) {
-                infoBar.innerText = "Error loading images.";
-            }
-        }
-
-        function buildGallery() {
-            gridContainer.innerHTML = '';
-            carouselTrack.innerHTML = '';
-            imageFiles.forEach((file, index) => {
-                const gridItem = document.createElement('div');
-                gridItem.className = 'grid-item';
-                gridItem.innerHTML = `<img src="${file.url}" alt="${file.name}" loading="lazy">`;
-                gridItem.onclick = (e) => openViewer(index, e);
-                gridContainer.appendChild(gridItem);
-
-                const thumb = document.createElement('div');
-                thumb.className = 'thumb';
-                thumb.id = `thumb-${index}`;
-                thumb.innerHTML = `<img src="${file.url}" alt="Thumb ${index}" loading="lazy">`;
-                thumb.onclick = () => setImage(index);
-                carouselTrack.appendChild(thumb);
-            });
-        }
-
-        function openViewer(index, event) {
-            if (isFullscreen) return;
-            const clickedItem = event.currentTarget;
-            const startRect = clickedItem.getBoundingClientRect();
-            const imageUrl = imageFiles[index].url;
-
-            mainDisplayImg.src = imageUrl;
-            mainDisplayImg.style.opacity = '0';
-
-            function startAnimation() {
-                imageViewer.style.display = 'flex';
-                galleryMenu.style.display = 'none';
-                imageViewer.offsetHeight;
-                const targetRect = mainDisplayImg.getBoundingClientRect();
-
-                const clone = clickedItem.cloneNode(true);
-                clone.style.position = 'fixed';
-                clone.style.top = startRect.top + 'px';
-                clone.style.left = startRect.left + 'px';
-                clone.style.width = startRect.width + 'px';
-                clone.style.height = startRect.height + 'px';
-                clone.style.zIndex = '1001';
-                clone.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-                clone.style.pointerEvents = 'none';
-                clone.style.margin = '0';
-                const cloneImg = clone.querySelector('img');
-                if (cloneImg) {
-                    cloneImg.style.width = '100%';
-                    cloneImg.style.height = '100%';
-                    cloneImg.style.objectFit = 'cover';
-                }
-                document.body.appendChild(clone);
-
-                clone.offsetHeight;
-
-                clone.style.top = targetRect.top + 'px';
-                clone.style.left = targetRect.left + 'px';
-                clone.style.width = targetRect.width + 'px';
-                clone.style.height = targetRect.height + 'px';
-                clone.style.borderRadius = '0';
-
-                setTimeout(() => {
-                    clone.remove();
-                    mainDisplayImg.style.opacity = '1';
-                }, 400);
-
-                setImage(index);
-            }
-
-            if (mainDisplayImg.complete && mainDisplayImg.naturalWidth !== 0) {
-                startAnimation();
-            } else {
-                mainDisplayImg.onload = startAnimation;
-            }
-        }
-
-        function closeViewer() {
-            if (isFullscreen) return;
-            const targetGridItem = gridContainer.children[currentIndex];
-            if (!targetGridItem) {
-                imageViewer.style.display = 'none';
-                galleryMenu.style.display = 'flex';
-                return;
-            }
-
-            galleryMenu.style.display = 'flex';
-            targetGridItem.scrollIntoView({ behavior: 'instant', block: 'center' });
-
-            requestAnimationFrame(() => {
-                const startRect = mainDisplayImg.getBoundingClientRect();
-                const targetRect = targetGridItem.getBoundingClientRect();
-
-                const clone = document.createElement('img');
-                clone.src = mainDisplayImg.src;
-                clone.style.position = 'fixed';
-                clone.style.top = startRect.top + 'px';
-                clone.style.left = startRect.left + 'px';
-                clone.style.width = startRect.width + 'px';
-                clone.style.height = startRect.height + 'px';
-                clone.style.zIndex = '1001';
-                clone.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-                clone.style.pointerEvents = 'none';
-                clone.style.objectFit = 'contain';
-                clone.style.boxShadow = '0 0 20px rgba(0,0,0,0.8)';
-                clone.style.borderRadius = '0';
-                document.body.appendChild(clone);
-
-                mainDisplayImg.style.opacity = '0';
-
-                clone.offsetHeight;
-
-                clone.style.top = targetRect.top + 'px';
-                clone.style.left = targetRect.left + 'px';
-                clone.style.width = targetRect.width + 'px';
-                clone.style.height = targetRect.height + 'px';
-                clone.style.objectFit = 'cover';
-                clone.style.boxShadow = 'none';
-                clone.style.borderRadius = '5px';
-
-                setTimeout(() => {
-                    clone.remove();
-                    imageViewer.style.display = 'none';
-                    mainDisplayImg.style.opacity = '0';
-                }, 400);
-            });
-        }
-
-        function setImage(index) {
-            currentIndex = index;
-            const file = imageFiles[index];
-            mainDisplayImg.src = file.url;
-            infoBar.innerText = `[VIEWING] ${file.name}`;
-            document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-            const activeThumb = document.getElementById(`thumb-${index}`);
-            if(activeThumb) {
-                activeThumb.classList.add('active');
-                activeThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-            }
-        }
-
-        function changeImage(direction) {
-            if (imageFiles.length === 0 || isFullscreen) return;
-            let newIndex = currentIndex + direction;
-            if (newIndex < 0) newIndex = imageFiles.length - 1;
-            if (newIndex >= imageFiles.length) newIndex = 0;
-            setImage(newIndex);
-        }
-
-        function enterFullscreen() {
-            if (isFullscreen) return;
-            const startRect = mainDisplayImg.getBoundingClientRect();
-
-            const clone = document.createElement('img');
-            clone.src = mainDisplayImg.src;
-            clone.style.position = 'fixed';
-            clone.style.top = startRect.top + 'px';
-            clone.style.left = startRect.left + 'px';
-            clone.style.width = startRect.width + 'px';
-            clone.style.height = startRect.height + 'px';
-            clone.style.zIndex = '2001';
-            clone.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-            clone.style.pointerEvents = 'none';
-            clone.style.objectFit = 'contain';
-            clone.style.boxShadow = '0 0 20px rgba(0,0,0,0.8)';
-            clone.style.borderRadius = '0';
-            document.body.appendChild(clone);
-
-            clone.offsetHeight;
-
-            clone.style.top = '0';
-            clone.style.left = '0';
-            clone.style.width = '100vw';
-            clone.style.height = '100vh';
-            clone.style.boxShadow = 'none';
-
-            fullscreenImg.src = mainDisplayImg.src;
-            fullscreenOverlay.style.display = 'flex';
-            fullscreenImg.style.opacity = '0';
-
-            setTimeout(() => {
-                clone.remove();
-                fullscreenImg.style.opacity = '1';
-                isFullscreen = true;
-            }, 400);
-        }
-
-        function exitFullscreen() {
-            if (!isFullscreen) return;
-            const startRect = fullscreenImg.getBoundingClientRect();
-            const targetRect = mainDisplayImg.getBoundingClientRect();
-
-            const clone = document.createElement('img');
-            clone.src = fullscreenImg.src;
-            clone.style.position = 'fixed';
-            clone.style.top = startRect.top + 'px';
-            clone.style.left = startRect.left + 'px';
-            clone.style.width = startRect.width + 'px';
-            clone.style.height = startRect.height + 'px';
-            clone.style.zIndex = '2001';
-            clone.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-            clone.style.pointerEvents = 'none';
-            clone.style.objectFit = 'contain';
-            clone.style.boxShadow = 'none';
-            clone.style.borderRadius = '0';
-            document.body.appendChild(clone);
-
-            fullscreenImg.style.opacity = '0';
-
-            clone.offsetHeight;
-
-            clone.style.top = targetRect.top + 'px';
-            clone.style.left = targetRect.left + 'px';
-            clone.style.width = targetRect.width + 'px';
-            clone.style.height = targetRect.height + 'px';
-            clone.style.boxShadow = '0 0 20px rgba(0,0,0,0.8)';
-
-            setTimeout(() => {
-                clone.remove();
-                fullscreenOverlay.style.display = 'none';
-                fullscreenImg.style.opacity = '1';
-                isFullscreen = false;
-                mainDisplayImg.style.opacity = '1';
-            }, 400);
-        }
-
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                if (isFullscreen) {
-                    exitFullscreen();
-                } else if (imageViewer.style.display === 'flex') {
-                    closeViewer();
+                typingText.innerHTML = current.substring(0, charIndex) + cursorSpan;
+                charIndex--;
+                if (charIndex === 0) {
+                    isDeleting = false;
+                    phraseIndex = (phraseIndex + 1) % phrases.length;
+                    typingSpeed = 300;
+                } else {
+                    typingSpeed = 25;
                 }
             }
+            setTimeout(typeLoop, typingSpeed);
+        }
+        setTimeout(typeLoop, 1200);
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
         });
 
-        mainDisplayImg.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (isFullscreen) return;
-            if (imageFiles.length === 0) return;
-            enterFullscreen();
-        });
-
-        fullscreenImg.addEventListener('click', (e) => {
-            e.stopPropagation();
-            exitFullscreen();
-        });
-
-        fullscreenOverlay.addEventListener('click', (e) => {
-            if (e.target === fullscreenOverlay) {
-                exitFullscreen();
-            }
-        });
-
-        fetchImagesFromGitHub();
+        console.log('%c? Block %cactivated! %cWelcome to QuestionBlock64.github.io %c',
+            'font-size:1.4em; color:#f0c040;', '', 'color:#a0a0b8;', 'font-size:1.2em;');
     </script>
 </body>
 </html>
