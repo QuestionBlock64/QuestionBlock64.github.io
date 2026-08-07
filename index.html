@@ -262,6 +262,11 @@
         }
         .project-card.unavailable:hover::after { opacity: 1; }
 
+        /* Canceled state for BrickGame World */
+        .project-card.canceled::after {
+            content: "Canceled";
+        }
+
         .project-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
         .project-link-btn {
             display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
@@ -526,17 +531,18 @@
                     </div>
                 </div>
 
-                <div class="project-card unavailable fade-in">
+                <!-- Super BrickGame World - Canceled -->
+                <div class="project-card unavailable canceled fade-in">
                     <img src="resources/brick.png" alt="Super BrickGame World icon" class="project-icon">
                     <h3>Super BrickGame World</h3>
                     <p>What started off as a Super Mario World rom hack is now it's own standalone game! (In developement)</p>
                     <div class="project-tags">
-                        <span class="project-tag">Godot</span>
                         <span class="project-tag">GDScript</span>
                         <span class="project-tag">C++</span>
                     </div>
                 </div>
 
+                <!-- Hello Neighbor: Shadow Within -->
                 <div class="project-card unavailable wip fade-in">
                     <img src="resources/hn.ico" alt="Hello Neighbor: Shadow Within icon" class="project-icon">
                     <h3>Hello Neighbor: Shadow Within</h3>
@@ -771,4 +777,4 @@
             'font-size:1.4em; color:#f0c040;', '', 'color:#a0a0b8;', 'font-size:1.2em;');
     </script>
 </body>
-</html>
+        </html>
